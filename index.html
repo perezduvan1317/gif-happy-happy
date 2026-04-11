@@ -3,64 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¿Aceptas la invitación?</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Calendario de Adviento | Cumple de Mi Amor</title>
+    <link rel="stylesheet" href="index.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <style>
-        body { background-color: #ffe4e6; overflow: hidden; font-family: 'Comic Sans MS', cursive; }
-        #btn-no { position: absolute; transition: all 0.2s ease; }
-    </style>
 </head>
-<body class="flex flex-col items-center justify-center h-screen">
+<body>
 
-    <div id="pantalla-inicio" class="text-center p-5">
-        <h1 class="text-4xl font-bold text-pink-600 mb-4">¡Faltan 30 días! 🎂</h1>
-        <p class="text-xl text-gray-700 mb-8">Tengo una dinámica preparada para ti... <br> ¿Quieres celebrar tu cumple conmigo?</p>
-        
-        <div class="flex justify-center gap-10 items-center h-40">
-            <button id="btn-si" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition-all">
-                ¡SÍ, OBVIO!
-            </button>
+    <div class="container" id="main-container">
+        <!-- Pantalla de RSVP -->
+        <div id="rsvp-screen">
+            <img src="birthday_calendar_header_1775872906016.png" alt="Header" style="width: 100%; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+            <h1 id="main-title">¿Aceptas el reto? 🎂</h1>
+            <p id="sub-title">He preparado algo especial para tu cumpleaños. Empieza el 1 de mayo.</p>
             
-            <button id="btn-no" class="bg-red-500 text-white font-bold py-3 px-8 rounded-full shadow-lg">
-                No...
-            </button>
+            <div class="btn-container">
+                <button id="btn-si" class="btn btn-yes">
+                    ¡SÍ, OBVIO!
+                </button>
+                
+                <button id="btn-no" class="btn btn-no" style="left: 60%; top: 60%;">
+                    No...
+                </button>
+            </div>
+        </div>
+
+        <!-- Pantalla del Calendario -->
+        <div id="calendar-screen" style="display: none;">
+            <h1>Tu Calendario de Adviento</h1>
+            <p>Una sorpresa cada día hasta tu cumple (10 de Mayo)</p>
+            <div class="calendar-grid" id="calendar-grid" style="display: grid;">
+                <!-- Dinámicamente generado -->
+            </div>
         </div>
     </div>
 
-    <div id="mensaje-final" class="hidden text-center p-5">
-        <h1 class="text-5xl mb-4">💖</h1>
-        <h2 class="text-3xl font-bold text-pink-600">¡Sabía que dirías que sí!</h2>
-        <p class="mt-4 text-gray-600 italic">Prepara tu celular el 1 de mayo, <br>que empieza la cuenta regresiva oficial.</p>
+    <div id="floating-text">¡Uy! Casi...</div>
+
+    <!-- Modal para las sorpresas -->
+    <div id="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modal-body">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
     </div>
 
     <script>
+        const DEBUG_MODE = true; // Cambiar a false para bloquear días por fecha real
+
         const btnNo = document.getElementById('btn-no');
         const btnSi = document.getElementById('btn-si');
-        let escalaSi = 1;
+        const floatingText = document.getElementById('floating-text');
+        const rsvpScreen = document.getElementById('rsvp-screen');
+        const calendarScreen = document.getElementById('calendar-screen');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modal-body');
+        const closeModal = document.querySelector('.close-modal');
 
-        // Función para mover el botón NO
-        btnNo.addEventListener('mouseover', () => {
-            const x = Math.random() * (window.innerWidth - btnNo.offsetWidth);
-            const y = Math.random() * (window.innerHeight - btnNo.offsetHeight);
+        let scaleSi = 1;
+        const funnyPhrases = [
+            "¿En serio? Piénsalo bien...",
+            "¡Ay! Casi me das...",
+            "¡Ni lo intentes!",
+            "Error 404: Botón 'No' no encontrado.",
+            "El 'No' se fue de vacaciones.",
+            "Mala idea, intenta el otro.",
+            "Estás dándole al equivocado, jeje.",
+            "¡Uy! Por un pelito.",
+            "¡Epa! No tan rápido.",
+            "¿Segura? El calendario tiene sorpresas...",
+            "¡Ja! Muy lenta.",
+            "¡Nop! Intenta de nuevo.",
+            "¿Ah, le querías dar que no? ¡Jamás!",
+            "¡Casi, pero no!"
+        ];
+
+        // Función para sonido "Boing"
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBoing() {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // Función para hablar
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'es-ES';
+                msg.pitch = 1.2;
+                msg.rate = 1.1;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        function moveNoButton() {
+            const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20);
+            const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20);
+            
+            btnNo.style.position = 'fixed';
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
             
+            // Mostrar texto flotante
+            const randomPhrase = funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)];
+            floatingText.innerText = randomPhrase;
+            floatingText.style.left = `${x}px`;
+            floatingText.style.top = `${y - 40}px`;
+            floatingText.style.opacity = '1';
+            
+            // Hablar la frase
+            speak(randomPhrase);
+            playBoing();
+
+            setTimeout(() => {
+                floatingText.style.opacity = '0';
+            }, 1000);
+
             // Hacer crecer el botón SÍ
-            escalaSi += 0.2;
-            btnSi.style.transform = `scale(${escalaSi})`;
-        });
+            scaleSi += 0.15;
+            btnSi.style.transform = `scale(${scaleSi})`;
+        }
+
+        btnNo.addEventListener('mouseover', moveNoButton);
+        btnNo.addEventListener('click', moveNoButton);
 
         // Al darle al SÍ
         btnSi.addEventListener('click', () => {
-            document.getElementById('pantalla-inicio').classList.add('hidden');
-            document.getElementById('mensaje-final').classList.remove('hidden');
+            rsvpScreen.style.display = 'none';
+            calendarScreen.style.display = 'block';
+            speak("¡Sabía que dirías que sí! Aquí tienes tu calendario.");
             confetti({
-                particleCount: 150,
-                spread: 70,
+                particleCount: 200,
+                spread: 100,
                 origin: { y: 0.6 }
             });
+            initCalendar();
         });
+
+        // Generar Calendario
+        const surprises = {
+            1: { title: "Día 1: ¡Empezamos!", content: "¡Hoy comienza la cuenta regresiva! Prepárate para 10 días de amor.", type: "text" },
+            2: { title: "Día 2: Un mensaje", content: "Eres lo más bonito que me ha pasado. ❤️", type: "text" },
+            3: { title: "Día 3: Recuerdo", content: "Nuestra primera foto juntos... (Espacio para foto)", type: "image" },
+            4: { title: "Día 4: Una canción", content: "Esta me recuerda a ti: [Link a canción]", type: "text" },
+            5: { title: "Día 5: Vale por...", content: "Vale por una cena deliciosa donde tú elijas.", type: "text" },
+            6: { title: "Día 6: Foto graciosa", content: "Dime si no nos veíamos bien aquí jaja.", type: "image" },
+            7: { title: "Día 7: La mitad", content: "Faltan solo 3 días. ¡La emoción crece!", type: "text" },
+            8: { title: "Día 8: Poema", content: "En el jardín del tiempo, tú eres la flor más bella... (Escribe algo lindo)", type: "text" },
+            9: { title: "Día 9: Casi es hora", content: "Mañana es el gran día. Descansa mucho.", type: "text" },
+            10: { title: "Día 10: ¡FELIZ CUMPLE!", content: "¡Llegó el día! Te amo infinitamente. ¡A celebrar!", type: "text" }
+        };
+
+        function initCalendar() {
+            calendarGrid.innerHTML = '';
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            
+            for (let i = 1; i <= 10; i++) {
+                const dayDate = new Date(currentYear, 4, i); // Mayo es mes 4 (0-index)
+                const card = document.createElement('div');
+                card.classList.add('day-card');
+                
+                // Lógica de bloqueo
+                if (!DEBUG_MODE && today < dayDate) {
+                    card.classList.add('locked');
+                }
+                
+                card.innerHTML = `
+                    <div class="day-number">${i}</div>
+                    <div class="day-label">Mayo</div>
+                `;
+
+                card.addEventListener('click', () => {
+                    if (card.classList.contains('locked')) {
+                        speak("¡Todavía no! Espera al " + i + " de mayo.");
+                        alert("¡Aún no es ese día! Paciencia...");
+                        return;
+                    }
+                    showSurprise(i);
+                });
+
+                calendarGrid.appendChild(card);
+            }
+        }
+
+        function showSurprise(day) {
+            const surprise = surprises[day];
+            modalBody.innerHTML = `
+                <h2 style="color: var(--primary-dark); margin-bottom: 1rem;">${surprise.title}</h2>
+                <p style="font-size: 1.1rem;">${surprise.content}</p>
+                ${surprise.type === 'image' ? '<div style="width: 100%; height: 200px; background: #eee; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-top: 1rem;">¡Aquí irá una foto! 📸</div>' : ''}
+            `;
+            modal.style.display = 'flex';
+            speak(surprise.title);
+        }
+
+        closeModal.onclick = () => modal.style.display = 'none';
+        window.onclick = (event) => { if (event.target == modal) modal.style.display = 'none'; };
+
+        // Crear corazones flotantes
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 3 + 's';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }
+
+        setInterval(createHeart, 500);
+
     </script>
 </body>
 </html>
