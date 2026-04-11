@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Aceptas la invitación?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body { background-color: #ffe4e6; overflow: hidden; font-family: 'Comic Sans MS', cursive; }
+        #btn-no { position: absolute; transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center h-screen">
+
+    <div id="pantalla-inicio" class="text-center p-5">
+        <h1 class="text-4xl font-bold text-pink-600 mb-4">¡Faltan 30 días! 🎂</h1>
+        <p class="text-xl text-gray-700 mb-8">Tengo una dinámica preparada para ti... <br> ¿Quieres celebrar tu cumple conmigo?</p>
+        
+        <div class="flex justify-center gap-10 items-center h-40">
+            <button id="btn-si" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition-all">
+                ¡SÍ, OBVIO!
+            </button>
+            
+            <button id="btn-no" class="bg-red-500 text-white font-bold py-3 px-8 rounded-full shadow-lg">
+                No...
+            </button>
+        </div>
+    </div>
+
+    <div id="mensaje-final" class="hidden text-center p-5">
+        <h1 class="text-5xl mb-4">💖</h1>
+        <h2 class="text-3xl font-bold text-pink-600">¡Sabía que dirías que sí!</h2>
+        <p class="mt-4 text-gray-600 italic">Prepara tu celular el 1 de mayo, <br>que empieza la cuenta regresiva oficial.</p>
+    </div>
+
+    <script>
+        const btnNo = document.getElementById('btn-no');
+        const btnSi = document.getElementById('btn-si');
+        let escalaSi = 1;
+
+        // Función para mover el botón NO
+        btnNo.addEventListener('mouseover', () => {
+            const x = Math.random() * (window.innerWidth - btnNo.offsetWidth);
+            const y = Math.random() * (window.innerHeight - btnNo.offsetHeight);
+            btnNo.style.left = `${x}px`;
+            btnNo.style.top = `${y}px`;
+            
+            // Hacer crecer el botón SÍ
+            escalaSi += 0.2;
+            btnSi.style.transform = `scale(${escalaSi})`;
+        });
+
+        // Al darle al SÍ
+        btnSi.addEventListener('click', () => {
+            document.getElementById('pantalla-inicio').classList.add('hidden');
+            document.getElementById('mensaje-final').classList.remove('hidden');
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        });
+    </script>
+</body>
+</html>
