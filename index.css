@@ -1,13 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
 :root {
-    --primary: #ff4d6d;
-    --primary-light: #ff758f;
-    --primary-dark: #c9184a;
-    --secondary: #ffb3c1;
-    --accent: #fff0f3;
-    --text: #590d22;
-    --bg: #fff0f3;
+    --primary: #ff007f;
+    --primary-light: #ff66b2;
+    --primary-dark: #cc0066;
+    --secondary: #ffe6f2;
+    --accent: #fff0f6;
+    --text: #4a0026;
+    --glass: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.4);
 }
 
 * {
@@ -18,42 +19,60 @@
 }
 
 body {
-    background: linear-gradient(135deg, #fff0f3 0%, #ffccd5 100%);
+    background: url('capybara_pig_bday_bg.png') center center;
+    background-size: cover; /* Changed to avoid excessive zooming if possible */
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow-x: hidden;
-    color: var(--text);
+    color: white;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 105, 180, 0.2); /* Soft pink overlay */
+    pointer-events: none;
+    z-index: 0;
 }
 
 .container {
-    width: 90%;
-    max-width: 800px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
+    width: 95%;
+    max-width: 450px;
+    background: transparent; /* Removed background */
+    backdrop-filter: none; /* Removed blur */
+    -webkit-backdrop-filter: none;
     border-radius: 30px;
-    padding: 3rem;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 1rem;
+    border: none; /* Removed border */
     text-align: center;
     position: relative;
     z-index: 10;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 800;
-    color: var(--primary-dark);
+    color: white;
     margin-bottom: 1rem;
     line-height: 1.2;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8), -1px -1px 0 #ff007f; /* Strong shadows for readability */
 }
 
 p {
     font-size: 1.2rem;
-    color: var(--text);
+    color: white;
     margin-bottom: 2rem;
-    opacity: 0.8;
+    font-weight: 600;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.9); /* Substantial shadow */
+    line-height: 1.4;
 }
 
 .btn-container {
@@ -77,21 +96,101 @@ p {
 }
 
 .btn-yes {
-    background: var(--primary);
+    background: #ff007f;
     color: white;
+    border: 2px solid rgba(255,255,255,0.5);
 }
 
 .btn-yes:hover {
-    background: var(--primary-dark);
+    background: #e60072;
     transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 15px 30px rgba(255, 77, 109, 0.4);
+    box-shadow: 0 15px 30px rgba(255, 0, 127, 0.4);
 }
 
 .btn-no {
-    background: white;
-    color: var(--primary);
-    border: 2px solid var(--primary);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
     position: absolute;
+}
+
+.countdown-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem; /* Reduced gap */
+    margin-top: 1.5rem;
+    flex-wrap: wrap; /* Ensure it wraps on small screens */
+}
+
+.countdown-item {
+    background: rgba(0, 0, 0, 0.5); /* Darker background for local contrast */
+    padding: 0.8rem 0.5rem;
+    border-radius: 15px;
+    min-width: 70px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.countdown-value {
+    display: block;
+    font-size: 1.5rem; /* Smaller font for better fit */
+    font-weight: 800;
+}
+
+.countdown-label {
+    font-size: 0.6rem; /* Smaller label */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Photo Placeholder */
+.photo-container {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 2.5rem;
+    border-radius: 30px; /* Slightly squared for a more modern look */
+    border: 6px solid white;
+    overflow: visible; /* Important for the hat to pop out */
+    box-shadow: 0 15px 35px rgba(74, 0, 38, 0.2);
+    position: relative;
+    background: #fff;
+    transform: rotate(-2deg);
+}
+
+.photo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 24px;
+}
+
+.photo-container::after {
+    content: '👑'; /* Or a birthday crown/hat emoji */
+    position: absolute;
+    top: -35px;
+    left: -20px;
+    font-size: 4rem;
+    transform: rotate(-25deg);
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+    animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: rotate(-25deg) translateY(0); }
+    50% { transform: rotate(-25deg) translateY(-10px); }
+}
+
+.hat {
+    display: none; /* We use the ::after crown instead for better positioning */
+}
+
+/* Sticker styles */
+.sticker {
+    position: fixed;
+    font-size: 2.5rem;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.6;
 }
 
 #floating-text {
