@@ -49,11 +49,17 @@
     <!-- Pantalla 2: El Reto -->
     <div class="container" id="rsvp-screen" style="display: none;">
         <h1>¿Aceptas el reto? 🎂</h1>
-        <p>Este no es un regalo tradicional... Es una dinámica de 10 días llena de sorpresas, recuerdos y mucho amor.
-        </p>
+        <p>Este no es un regalo tradicional... Es una dinámica de 10 días llena de sorpresas, recuerdos y mucho amor.</p>
+
+        <!-- Meme Display -->
+        <div id="meme-display" style="display: none;">
+            <img id="meme-img" src="" alt="Meme">
+            <p id="meme-caption"></p>
+        </div>
+
         <div class="btn-container">
-            <button id="btn-si" class="btn btn-yes" style="flex: 1;">¡SÍ, OBVIO!</button>
-            <button id="btn-no" class="btn btn-no" style="position: relative; flex: 1;">No...</button>
+            <button id="btn-si" class="btn btn-yes btn-disabled" disabled style="transform: scale(0.2);">¡SÍ, OBVIO!</button>
+            <button id="btn-no" class="btn btn-no" style="position: relative;">No...</button>
         </div>
     </div>
 
@@ -120,7 +126,29 @@
         const modalBody = document.getElementById('modal-body');
         const closeModal = document.querySelector('.close-modal');
 
-        let scaleSi = 1;
+        // Meme config
+        const UNLOCK_THRESHOLD = 10;
+        const INITIAL_SCALE = 0.2;
+        let scaleSi = INITIAL_SCALE;
+        let noCount = 0;
+
+        const memeImg = document.getElementById('meme-img');
+        const memeCaption = document.getElementById('meme-caption');
+
+        // Secuencia de memes: capibara -> marranito -> tortuga
+        const memeSequence = [
+            { src: 'meme_1.png', caption: '¿En serio me dijiste que no? 😤' },
+            { src: 'meme_1.png', caption: 'Te estoy vigilando... 👀' },
+            { src: 'meme_1.png', caption: 'Última oportunidad con la capibara...' },
+            { src: 'meme_2.png', caption: '¡No puede ser! 🐷' },
+            { src: 'meme_2.png', caption: 'El marranito está triste por tu culpa 😢' },
+            { src: 'meme_2.png', caption: '¡Oink! ¡Dime que sí!' },
+            { src: 'meme_2.png', caption: 'Ya van muchos "No"... 🐽' },
+            { src: 'meme_3.png', caption: 'Aún sigo esperando... 🐢' },
+            { src: 'meme_3.png', caption: 'La tortuga ya se cansó de esperar...' },
+            { src: 'meme_3.png', caption: '¡ÚLTIMO INTENTO! ¡Dale que sí! 🎉' },
+        ];
+
         const funnyPhrases = [
             "¿En serio? Piénsalo bien...",
             "¡Ay! Casi me das...",
@@ -128,15 +156,31 @@
             "El 'No' se fue de vacaciones.",
             "¡Ja! Muy lenta.",
             "¿Ah, le querías dar que no? ¡Jamás!",
-            "¡Casi, pero no!"
+            "¡Casi, pero no!",
+            "¡Noooo! ¡Piénsalo otra vez!",
+            "Ya casi le das al SÍ...",
+            "¡Un poquito más!"
         ];
 
         // Navegación
         function showScreen(screenId) {
             Object.values(screens).forEach(s => s.style.display = 'none');
-            screens[screenId].style.display = 'flex'; // Changed to flex for better centering
+            screens[screenId].style.display = 'flex';
             screens[screenId].style.flexDirection = 'column';
             screens[screenId].style.alignItems = 'center';
+
+            // Inicializar estado del botón SÍ al mostrar pantalla 2
+            if (screenId === 'rsvp') {
+                noCount = 0;
+                scaleSi = INITIAL_SCALE;
+                btnSi.style.transform = `scale(${INITIAL_SCALE})`;
+                btnSi.disabled = true;
+                btnSi.classList.add('btn-disabled');
+                document.getElementById('meme-display').style.display = 'none';
+                btnNo.style.position = 'relative';
+                btnNo.style.left = '';
+                btnNo.style.top = '';
+            }
         }
 
         // Countdown Timer
@@ -151,45 +195,55 @@
             document.getElementById('seconds').innerText = Math.floor((distance % (1000 * 60)) / 1000);
         }, 1000);
 
-        // Sonido "Boing" (Mantenemos por diversión, pero sin voces)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBoing() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        }
+        // Lógica Botón NO (optimizado para móvil: click, no hover)
+        function handleNoClick() {
+            noCount++;
 
-        // Lógica Botón NO
-        function moveNoButton() {
+            // Mostrar meme en secuencia
+            const memeDisplay = document.getElementById('meme-display');
+            memeDisplay.style.display = 'block';
+            const memeIndex = Math.min(noCount - 1, memeSequence.length - 1);
+            const currentMeme = memeSequence[memeIndex];
+            memeImg.src = currentMeme.src;
+            memeCaption.innerText = currentMeme.caption;
+
+            // Mover el botón NO a posición aleatoria
             const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20);
             const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20);
             btnNo.style.position = 'fixed';
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
 
+            // Mostrar frase flotante
             const randomPhrase = funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)];
             floatingText.innerText = randomPhrase;
             floatingText.style.left = `${x}px`;
             floatingText.style.top = `${y - 40}px`;
             floatingText.style.opacity = '1';
-            playBoing();
-            setTimeout(() => floatingText.style.opacity = '0', 1000);
+            setTimeout(() => floatingText.style.opacity = '0', 1200);
 
-            scaleSi += 0.15;
+            // Crecer botón SÍ progresivamente
+            const growthPerClick = (1.8 - INITIAL_SCALE) / UNLOCK_THRESHOLD;
+            scaleSi += growthPerClick;
             btnSi.style.transform = `scale(${scaleSi})`;
+
+            // Desbloquear botón SÍ al llegar al umbral
+            if (noCount >= UNLOCK_THRESHOLD) {
+                btnSi.disabled = false;
+                btnSi.classList.remove('btn-disabled');
+                btnSi.classList.add('btn-unlocked');
+                // Efecto visual de desbloqueo
+                btnSi.style.transform = `scale(1.5)`;
+                confetti({ particleCount: 80, spread: 50, origin: { y: 0.7 } });
+            }
         }
 
         // Eventos
         btnStart.addEventListener('click', () => showScreen('rsvp'));
-        btnNo.addEventListener('mouseover', moveNoButton);
-        btnNo.addEventListener('click', moveNoButton);
+        btnNo.addEventListener('click', handleNoClick);
 
         btnSi.addEventListener('click', () => {
+            if (btnSi.disabled) return;
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             showScreen('instructions');
         });
@@ -256,11 +310,6 @@
         }
 
         setInterval(() => createDecoration('❤️', 'heart'), 400);
-        const stickers = ['🐷', '✨', '🎈', '🎂', '⭐', '🐹', '🐽', '💖']; // Adding pig and hamster (for capibara feel) emojis
-        for (let i = 0; i < 20; i++) {
-            createDecoration(stickers[Math.floor(Math.random() * stickers.length)], 'sticker');
-        }
-
     </script>
 </body>
 
