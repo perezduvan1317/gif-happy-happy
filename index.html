@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Regalo de Cumpleaños | Mi Amor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="index.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
@@ -15,11 +19,10 @@
     <div class="container" id="welcome-screen">
         <div class="photo-container">
             <!-- Espacio para foto de ella: cambiar 'src' por la ruta de tu imagen -->
-            <img src="foto_she.png"
-                alt="Cumpleañera">
+            <img src="foto_she.png" alt="Cumpleañera">
         </div>
-        <h1>Hola amor lindo ❤️</h1>
-        <p>Espero que te guste este pequeño detalle , preparate para lo más epico que hayas visto (jejeje no es cierto) ¿Estas lista para celebrar tu cumpleaañooos?</p>
+        <h1> Hola mi casi cumpleañera</h1>
+        <p>Te tengo una pregunta muy importante</p>
 
         <div class="countdown-container">
             <div class="countdown-item">
@@ -42,15 +45,13 @@
         <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">Para tu cumple (10 de Mayo)</p>
 
         <button id="btn-start" class="btn btn-yes" style="margin-top: 2rem; width: 100%;">
-            ¡SÍ, EMPECEMOS! ✨
+            Press start
         </button>
     </div>
 
     <!-- Pantalla 2: El Reto -->
     <div class="container" id="rsvp-screen" style="display: none;">
-        <h1>¿Aceptas el reto? 🎂</h1>
-        <p>Este no es un regalo tradicional... Es una dinámica de 10 días llena de sorpresas, recuerdos y mucho amor.</p>
-
+        <h1>¿Aceptas compartir conmigo? 🎂</h1>
         <!-- Meme Display -->
         <div id="meme-display" style="display: none;">
             <img id="meme-img" src="" alt="Meme">
@@ -58,7 +59,8 @@
         </div>
 
         <div class="btn-container">
-            <button id="btn-si" class="btn btn-yes btn-disabled" disabled style="transform: scale(0.2);">¡SÍ, OBVIO!</button>
+            <button id="btn-si" class="btn btn-yes btn-disabled" disabled style="transform: scale(0.2);">¡SÍ,
+                OBVIO!</button>
             <button id="btn-no" class="btn btn-no" style="position: relative;">No...</button>
         </div>
     </div>
