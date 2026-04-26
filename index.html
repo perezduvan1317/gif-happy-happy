@@ -58,6 +58,7 @@
 
         <!-- Meme Display -->
         <div id="meme-display" style="display: none; margin-top: 2rem;">
+            <div id="meme-emoji" style="display: none;"></div>
             <img id="meme-img" src="" alt="Meme">
             <p id="meme-caption"></p>
         </div>
@@ -134,32 +135,37 @@
 
         const memeImg = document.getElementById('meme-img');
         const memeCaption = document.getElementById('meme-caption');
+        const memeEmoji = document.getElementById('meme-emoji');
 
-        // Secuencia de memes: capibara -> marranito -> tortuga
+        // Secuencia de memes: cada clic cambia imagen y texto
+        // type: 'img' usa una imagen, type: 'emoji' usa un emoji animado gigante
         const memeSequence = [
-            { src: 'meme_1.png', caption: '¿En serio me dijiste que no? 😤' },
-            { src: 'meme_1.png', caption: 'Te estoy vigilando... 👀' },
-            { src: 'meme_1.png', caption: 'Última oportunidad con la capibara...' },
-            { src: 'meme_2.png', caption: '¡No puede ser! 🐷' },
-            { src: 'meme_2.png', caption: 'El marranito está triste por tu culpa 😢' },
-            { src: 'meme_2.png', caption: '¡Oink! ¡Dime que sí!' },
-            { src: 'meme_2.png', caption: 'Ya van muchos "No"... 🐽' },
-            { src: 'meme_3.png', caption: 'Aún sigo esperando... 🐢' },
-            { src: 'meme_3.png', caption: 'La tortuga ya se cansó de esperar...' },
-            { src: 'meme_3.png', caption: '¡ÚLTIMO INTENTO! ¡Dale que sí! 🎉' },
+            { type: 'img', src: 'meme_1.png', caption: 'La capibara no te va a perdonar esto... 🥺' },
+            { type: 'emoji', emoji: '🐷💔', caption: 'El cerdito se le rompió el corazoncito...' },
+            { type: 'img', src: 'meme_2.png', caption: '¡Oink! ¡Me hiciste llorar! 😭' },
+            { type: 'emoji', emoji: '🐢💧', caption: 'La tortuguita va lento pero igual le duele...' },
+            { type: 'img', src: 'meme_1.png', caption: '¿Cómo le dices no a esta carita? 🥹' },
+            { type: 'emoji', emoji: '🐰😢', caption: 'Hasta el conejito está triste por ti...' },
+            { type: 'img', src: 'meme_2.png', caption: 'El cerdito ya preparó el pastel y tú le dices no... 🎂' },
+            { type: 'emoji', emoji: '🐱💦', caption: 'El gatito lloró 3 veces por tu culpa...' },
+            { type: 'img', src: 'meme_1.png', caption: 'La capibara dice: dale sí, porfa bonita 🥺✨' },
+            { type: 'emoji', emoji: '🦊😿', caption: 'Hasta el zorrito perdió la esperanza...' },
+            { type: 'img', src: 'meme_2.png', caption: '¡ÚLTIMO OINK! ¡El cerdito te lo suplica! 🐷🙏' },
+            { type: 'emoji', emoji: '🐻❤️‍🩹', caption: 'El osito necesita que digas sí para sanarse...' },
+            { type: 'img', src: 'meme_1.png', caption: 'Ya no queda capibara que aguante... ¡DALE SÍ! 💕' },
         ];
 
         const funnyPhrases = [
-            "¿En serio? Piénsalo bien...",
-            "¡Ay! Casi me das...",
-            "¡Ni lo intentes!",
-            "El 'No' se fue de vacaciones.",
-            "¡Ja! Muy lenta.",
-            "¿Ah, le querías dar que no? ¡Jamás!",
-            "¡Casi, pero no!",
-            "¡Noooo! ¡Piénsalo otra vez!",
-            "Ya casi le das al SÍ...",
-            "¡Un poquito más!"
+            "¡Ay no! ¡Piénsalo bonito! 🥺",
+            "¿Segura? Los animalitos lloran...",
+            "¡El botón se escapó! 🏃‍♀️",
+            "El 'No' salió volando~ ✨",
+            "¡Jiji! No me atrapas 💕",
+            "Los animalitos dicen: ¡nooo!",
+            "¡Casi! Pero el sí te espera~",
+            "¡Uy! Se movió solito 🫣",
+            "¡Dale al grandote rosita! 💖",
+            "¡Un poquitito más cerca del sí!"
         ];
 
         // Navegación
@@ -201,12 +207,26 @@
         function handleNoClick() {
             noCount++;
 
-            // Mostrar meme en secuencia
+            // Mostrar meme en secuencia (cicla si hay más clics que memes)
             const memeDisplay = document.getElementById('meme-display');
             memeDisplay.style.display = 'block';
-            const memeIndex = Math.min(noCount - 1, memeSequence.length - 1);
+            const memeIndex = (noCount - 1) % memeSequence.length;
             const currentMeme = memeSequence[memeIndex];
-            memeImg.src = currentMeme.src;
+
+            // Animación de entrada
+            memeDisplay.style.animation = 'none';
+            memeDisplay.offsetHeight; // trigger reflow
+            memeDisplay.style.animation = 'memePopIn 0.4s ease-out';
+
+            if (currentMeme.type === 'emoji') {
+                memeImg.style.display = 'none';
+                memeEmoji.style.display = 'flex';
+                memeEmoji.innerHTML = currentMeme.emoji;
+            } else {
+                memeEmoji.style.display = 'none';
+                memeImg.style.display = 'block';
+                memeImg.src = currentMeme.src;
+            }
             memeCaption.innerText = currentMeme.caption;
 
             // Mover el botón NO a posición aleatoria
