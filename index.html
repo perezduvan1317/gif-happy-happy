@@ -42,7 +42,6 @@
                 <span class="countdown-label">Seg</span>
             </div>
         </div>
-        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">Para tu cumple (10 de Mayo)</p>
 
         <button id="btn-start" class="btn btn-yes" style="margin-top: 2rem; width: 100%;">
             Press start
@@ -51,17 +50,16 @@
 
     <!-- Pantalla 2: El Reto -->
     <div class="container" id="rsvp-screen" style="display: none;">
-        <h1>¿Aceptas compartir conmigo? 🎂</h1>
-        <!-- Meme Display -->
-        <div id="meme-display" style="display: none;">
-            <img id="meme-img" src="" alt="Meme">
-            <p id="meme-caption"></p>
+        <h1>¿Aceptas compartirlo conmigo? 🎂</h1>
+        <div class="btn-container">
+            <button id="btn-si" class="btn btn-yes" style="transform: scale(0.6);">SÍ</button>
+            <button id="btn-no" class="btn btn-no" style="position: relative;">No...</button>
         </div>
 
-        <div class="btn-container">
-            <button id="btn-si" class="btn btn-yes btn-disabled" disabled style="transform: scale(0.2);">¡SÍ,
-                OBVIO!</button>
-            <button id="btn-no" class="btn btn-no" style="position: relative;">No...</button>
+        <!-- Meme Display -->
+        <div id="meme-display" style="display: none; margin-top: 2rem;">
+            <img id="meme-img" src="" alt="Meme">
+            <p id="meme-caption"></p>
         </div>
     </div>
 
@@ -130,7 +128,7 @@
 
         // Meme config
         const UNLOCK_THRESHOLD = 10;
-        const INITIAL_SCALE = 0.2;
+        const INITIAL_SCALE = 0.6;
         let scaleSi = INITIAL_SCALE;
         let noCount = 0;
 
@@ -176,12 +174,14 @@
                 noCount = 0;
                 scaleSi = INITIAL_SCALE;
                 btnSi.style.transform = `scale(${INITIAL_SCALE})`;
-                btnSi.disabled = true;
-                btnSi.classList.add('btn-disabled');
                 document.getElementById('meme-display').style.display = 'none';
-                btnNo.style.position = 'relative';
-                btnNo.style.left = '';
-                btnNo.style.top = '';
+                
+                // Posicionar botón NO "alrededor" (fuera del flujo) para que SÍ esté en el centro
+                btnNo.style.position = 'fixed';
+                const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20);
+                const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20);
+                btnNo.style.left = `${x}px`;
+                btnNo.style.top = `${y}px`;
             }
         }
 
@@ -224,19 +224,13 @@
             floatingText.style.opacity = '1';
             setTimeout(() => floatingText.style.opacity = '0', 1200);
 
-            // Crecer botón SÍ progresivamente
-            const growthPerClick = (1.8 - INITIAL_SCALE) / UNLOCK_THRESHOLD;
-            scaleSi += growthPerClick;
+            // Crecer botón SÍ exponencialmente
+            scaleSi = INITIAL_SCALE * Math.pow(1.5, noCount);
             btnSi.style.transform = `scale(${scaleSi})`;
-
-            // Desbloquear botón SÍ al llegar al umbral
-            if (noCount >= UNLOCK_THRESHOLD) {
-                btnSi.disabled = false;
-                btnSi.classList.remove('btn-disabled');
+            
+            // Efecto de brillo si es muy grande
+            if (noCount >= 5) {
                 btnSi.classList.add('btn-unlocked');
-                // Efecto visual de desbloqueo
-                btnSi.style.transform = `scale(1.5)`;
-                confetti({ particleCount: 80, spread: 50, origin: { y: 0.7 } });
             }
         }
 
