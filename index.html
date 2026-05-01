@@ -19,7 +19,7 @@
     <div class="container" id="welcome-screen">
         <div class="photo-container">
             <!-- Espacio para foto de ella: cambiar 'src' por la ruta de tu imagen -->
-            <img src="foto_she.png" alt="Cumpleañera">
+            <img src="assets/laura/foto_she.png" alt="Cumpleañera">
         </div>
         <h1> Hola mi casi cumpleañera</h1>
         <p>Te tengo una pregunta muy importante</p>
@@ -59,7 +59,7 @@
 
     <!-- Pantalla 2: El Reto -->
     <div class="container" id="rsvp-screen" style="display: none;">
-        <h1>¿Aceptas compartirlo conmigo? 🎂</h1>
+        <h1>¿Quisieras compartirlo conmigo? 🎂</h1>
         <div class="btn-container">
             <button id="btn-si" class="btn btn-yes" style="transform: scale(0.6);">SÍ</button>
             <button id="btn-no" class="btn btn-no" style="position: relative;">No...</button>
@@ -69,7 +69,9 @@
         <div id="meme-display" style="display: none; margin-top: 2rem;">
             <div id="meme-emoji" style="display: none;"></div>
             <img id="meme-img" src="" alt="Meme">
-            <p id="meme-caption"></p>
+            <p id="meme-caption"
+                style="padding: 1rem; color: #ff4d6d; font-weight: bold; font-size: 1.1rem; text-shadow: 1px 1px 0 #fff;">
+            </p>
         </div>
     </div>
 
@@ -78,25 +80,25 @@
         <h1>Manual de Instrucciones 📑</h1>
         <div
             style="text-align: left; background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 20px; margin-bottom: 2rem;">
-            <p>1. Cada día recibirás un link especial.</p>
-            <p>2. Al entrar, podrás desbloquear la sorpresa del día.</p>
-            <p>3. Tendrás retos, fotos y mensajes cada mañana.</p>
-            <p>4. El 10 de mayo será la gran sorpresa final.</p>
+            <p>🔊 ¡Sube el volumen! Habrá sonidos y música especial (no te asustes 😉).</p>
+            <p>✨ Te llegará una notificación cada vez que haya un regalito nuevo para ti.</p>
+            <p>📱 La aplicación siempre estará disponible con los regalitos que ya hayas abierto.</p>
+            <p>💬 Si tienes cualquier duda, puedes escribirme directamente a mi WhatsApp.</p>
         </div>
-        <button id="btn-next-instr" class="btn btn-yes">Siguiente: Día 1 ➡️</button>
+        <button id="btn-next-instr" class="btn btn-yes">Siguiente: Regalo 1 ➡️</button>
     </div>
 
     <!-- Pantalla 4: Animación Desbloqueo -->
     <div class="container" id="unlock-screen" style="display: none;">
         <h1 style="font-size: 5rem;">🎁</h1>
-        <h1 id="unlock-text">¡DÍA 1 DESBLOQUEADO!</h1>
+        <h1 id="unlock-text">¡REGALITO 1 DESBLOQUEADO!</h1>
         <p>Prepárate para la primera sorpresa...</p>
     </div>
 
     <!-- Pantalla 5: Calendario -->
     <div class="container" id="calendar-screen" style="display: none;">
-        <h1>Tu Calendario de Adviento</h1>
-        <p>Una sorpresa cada día hasta tu cumple</p>
+        <h1>Tus Regalitos Especiales</h1>
+        <p>Toca un regalo para descubrir tu sorpresa</p>
         <div class="calendar-grid" id="calendar-grid" style="display: grid;">
             <!-- Dinámicamente generado -->
         </div>
@@ -114,7 +116,8 @@
         </div>
     </div>
 
-    <div id="floating-text">¡Uy! Casi...</div>
+    <!-- Elemento de Audio Oculto -->
+    <audio id="bg-music" src="assets/music/10 - Married Life (Piano Version).mp3"></audio>
 
     <script>
         const DEBUG_MODE = true;
@@ -133,17 +136,24 @@
         const currentDay = getCurrentDay();
 
         window.addEventListener('load', () => {
-            if (forcedDay && forcedDay > 0 && forcedDay <= 10) {
+            if (forcedDay && forcedDay > 0 && forcedDay <= 5) {
                 // Si entra con un link de día, saltar directo al desbloqueo
                 handleDayEntry(forcedDay);
             } else if (currentDay > 0) {
-                // Si es un día de mayo, personalizar el inicio
-                document.getElementById('btn-start').innerText = `Entrar al Día ${currentDay} 🎁`;
+                // Para pruebas, siempre texto de inicio
+                btnStart.innerText = `Press Start 🎮`;
             }
         });
 
         function handleDayEntry(day) {
-            document.getElementById('unlock-text').innerText = `¡DÍA ${day} DESBLOQUEADO!`;
+            // Guardar en localStorage que este regalo ya se abrió
+            const openedGifts = JSON.parse(localStorage.getItem('openedGifts') || '[]');
+            if (!openedGifts.includes(day)) {
+                openedGifts.push(day);
+                localStorage.setItem('openedGifts', JSON.stringify(openedGifts));
+            }
+
+            document.getElementById('unlock-text').innerText = `¡REGALITO ${day} DESBLOQUEADO!`;
             showScreen('unlock');
             setTimeout(() => {
                 showDayContent(day);
@@ -165,8 +175,9 @@
         const btnSi = document.getElementById('btn-si');
         const btnNo = document.getElementById('btn-no');
         const btnNextInstr = document.getElementById('btn-next-instr');
+        const btnBack = document.getElementById('btn-back-calendar');
 
-        const floatingText = document.getElementById('floating-text');
+
         const calendarGrid = document.getElementById('calendar-grid');
         const modal = document.getElementById('modal');
         const modalBody = document.getElementById('modal-body');
@@ -181,36 +192,19 @@
         const memeImg = document.getElementById('meme-img');
         const memeCaption = document.getElementById('meme-caption');
         const memeEmoji = document.getElementById('meme-emoji');
+        const bgMusic = document.getElementById('bg-music');
 
         // Secuencia de memes: cada clic cambia imagen y texto
         // type: 'img' usa una imagen, type: 'emoji' usa un emoji animado gigante
         const memeSequence = [
-            { type: 'img', src: 'meme_1.png', caption: 'La capibara no te va a perdonar esto... 🥺' },
-            { type: 'emoji', emoji: '🐷💔', caption: 'El cerdito se le rompió el corazoncito...' },
-            { type: 'img', src: 'meme_2.png', caption: '¡Oink! ¡Me hiciste llorar! 😭' },
-            { type: 'emoji', emoji: '🐢💧', caption: 'La tortuguita va lento pero igual le duele...' },
-            { type: 'img', src: 'meme_1.png', caption: '¿Cómo le dices no a esta carita? 🥹' },
-            { type: 'emoji', emoji: '🐰😢', caption: 'Hasta el conejito está triste por ti...' },
-            { type: 'img', src: 'meme_2.png', caption: 'El cerdito ya preparó el pastel y tú le dices no... 🎂' },
-            { type: 'emoji', emoji: '🐱💦', caption: 'El gatito lloró 3 veces por tu culpa...' },
-            { type: 'img', src: 'meme_1.png', caption: 'La capibara dice: dale sí, porfa bonita 🥺✨' },
-            { type: 'emoji', emoji: '🦊😿', caption: 'Hasta el zorrito perdió la esperanza...' },
-            { type: 'img', src: 'meme_2.png', caption: '¡ÚLTIMO OINK! ¡El cerdito te lo suplica! 🐷🙏' },
-            { type: 'emoji', emoji: '🐻❤️‍🩹', caption: 'El osito necesita que digas sí para sanarse...' },
-            { type: 'img', src: 'meme_1.png', caption: 'Ya no queda capibara que aguante... ¡DALE SÍ! 💕' },
-        ];
-
-        const funnyPhrases = [
-            "¡Ay no! ¡Piénsalo bonito! 🥺",
-            "¿Segura? Los animalitos lloran...",
-            "¡El botón se escapó! 🏃‍♀️",
-            "El 'No' salió volando~ ✨",
-            "¡Jiji! No me atrapas 💕",
-            "Los animalitos dicen: ¡nooo!",
-            "¡Casi! Pero el sí te espera~",
-            "¡Uy! Se movió solito 🫣",
-            "¡Dale al grandote rosita! 💖",
-            "¡Un poquitito más cerca del sí!"
+            { type: 'img', src: 'assets/memes/1.jpg', caption: 'Oye porque le diste que no :(' },
+            { type: 'img', src: 'assets/memes/2.jpg', caption: 'Luego no dices que me amas' },
+            { type: 'img', src: 'assets/memes/3.jpg', caption: 'DALE QUE SI!!!!!' },
+            { type: 'img', src: 'assets/memes/4.jpg', caption: 'Lo que no sabes es que, por cada NO es 1 regalo menos jeje' },
+            { type: 'img', src: 'assets/memes/5.jpg', caption: 'sin palabras :c' },
+            { type: 'img', src: 'assets/memes/6.jpg', caption: 'Hiciste que regara un mar de lagrimas' },
+            { type: 'img', src: 'assets/memes/7.jpg', caption: 'Haz herido mi corazoncito' },
+            { type: 'img', src: 'assets/memes/8.jpg', caption: 'Ultima oportunidad, no te arrepientas' },
         ];
 
         // Navegación
@@ -250,8 +244,49 @@
             document.getElementById('seconds').innerText = Math.floor((distance % (1000 * 60)) / 1000);
         }, 1000);
 
+        // Generador de Sonidos Sintetizados (Web Audio API)
+        function playSound(type) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            const now = ctx.currentTime;
+
+            if (type === 'yes') {
+                // Sonido alegre ascendente
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'no') {
+                // Sonido de rebote
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else {
+                // Click estándar
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        }
+
         // Lógica Botón NO (optimizado para móvil: click, no hover)
         function handleNoClick() {
+            playSound('no');
             noCount++;
 
             // Mostrar meme en secuencia (cicla si hay más clics que memes)
@@ -276,21 +311,26 @@
             }
             memeCaption.innerText = currentMeme.caption;
 
-            // Mover el botón NO a posición aleatoria dentro de los límites
+            // Mover el botón NO a posición aleatoria evitando el área del meme
             const padding = 50;
-            const x = Math.max(padding, Math.min(window.innerWidth - btnNo.offsetWidth - padding, Math.random() * window.innerWidth));
-            const y = Math.max(padding, Math.min(window.innerHeight - btnNo.offsetHeight - padding, Math.random() * window.innerHeight));
+            const memeRect = memeDisplay.getBoundingClientRect();
+            let x, y;
+            let attempts = 0;
+
+            do {
+                x = Math.max(padding, Math.min(window.innerWidth - btnNo.offsetWidth - padding, Math.random() * window.innerWidth));
+                y = Math.max(padding, Math.min(window.innerHeight - btnNo.offsetHeight - padding, Math.random() * window.innerHeight));
+                attempts++;
+                // Intentar encontrar un hueco que no choque con el meme (máximo 20 intentos)
+            } while (attempts < 20 &&
+            x < memeRect.right + 20 &&
+            x + btnNo.offsetWidth > memeRect.left - 20 &&
+            y < memeRect.bottom + 20 &&
+                y + btnNo.offsetHeight > memeRect.top - 20);
+
             btnNo.style.position = 'fixed';
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
-
-            // Mostrar frase flotante
-            const randomPhrase = funnyPhrases[Math.floor(Math.random() * funnyPhrases.length)];
-            floatingText.innerText = randomPhrase;
-            floatingText.style.left = `${x}px`;
-            floatingText.style.top = `${y - 40}px`;
-            floatingText.style.opacity = '1';
-            setTimeout(() => floatingText.style.opacity = '0', 1200);
 
             // Crecer botón SÍ exponencialmente
             scaleSi = INITIAL_SCALE * Math.pow(1.5, noCount);
@@ -303,16 +343,32 @@
         }
 
         // Eventos
-        btnStart.addEventListener('click', () => showScreen('rsvp'));
+        btnStart.addEventListener('click', () => {
+            playSound('click');
+            showScreen('rsvp');
+        });
         btnNo.addEventListener('click', handleNoClick);
 
         btnSi.addEventListener('click', () => {
             if (btnSi.disabled) return;
+            playSound('yes');
+            localStorage.setItem('acceptedRSVP', 'true'); // Guardar que ya aceptó
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             showScreen('instructions');
         });
 
         btnNextInstr.addEventListener('click', () => {
+            playSound('click');
+            showScreen('calendar');
+            initCalendar();
+        });
+
+        btnBack.addEventListener('click', () => {
+            // Detener música al salir
+            if (bgMusic) {
+                bgMusic.pause();
+                bgMusic.currentTime = 0;
+            }
             showScreen('calendar');
             initCalendar();
         });
@@ -324,91 +380,91 @@
                 type: "story",
                 slides: [
                     {
-                        image: "laura1.jpg", // Foto 1
+                        image: "assets/laura/laura1.jpg", // Foto 1
                         message: "Hoy es tiempo de ver el pasado, de recordar y ver que cada paso que diste te trajo hasta aquí. Que lo curiosa que eras, lo tierna sigue contigo."
                     },
                     {
-                        image: "laura2.jpg", // Foto 2
+                        image: "assets/laura/laura2.jpg", // Foto 2
                         message: "Que esos crespitos sigan ahí acompañándote, aunque a veces te quejes de ellos. Lo que siempre ha estado contigo es esa ternura y esa forma tan tuya de ver el mundo."
                     },
                     {
-                        image: "laura3.jpg", // Foto 3
+                        image: "assets/laura/laura3.jpg", // Foto 3
                         message: "Esa capacidad de hacer sentir bien a todos... gracias por cada risa, cada sueño y cada paso que diste sin saber que un día nuestros caminos se cruzarían."
                     },
                     {
-                        image: "laura4.jpg", // Foto 4
+                        image: "assets/laura/laura4.jpg", // Foto 4
                         message: "Tu dulzura, con tu cabellito despeinado, como siempre queriendo salir en la foto."
                     },
                     {
-                        image: "laura5.jpg", // Foto 5
+                        image: "assets/laura/laura5.jpg", // Foto 5
                         message: "Como siempre una mujer cuidadora, dedicada, amorosa con su hermanita y su familia."
                     },
                     {
-                        image: "laura6.jpg", // Foto 6
+                        image: "assets/laura/laura6.jpg", // Foto 6
                         message: "Protegiendo a tu hermanita como siempre. Gracias por tanto amor."
                     },
                     {
-                        image: "laura7.jpg", // Foto 5
+                        image: "assets/laura/laura7.jpg", // Foto 5
                         message: "Desde niña rodeada de las personas que la aman, y que siempre te han apoyado y acompañado."
                     },
                     {
-                        image: "laura8.jpg", // Foto 6
+                        image: "assets/laura/laura8.jpg", // Foto 6
                         message: "Con esas miraditas tan tuyas y esa forma de vestir, desde siempre con buenos gustos"
                     },
                     {
-                        image: "laura9.jpg", // Foto 5
+                        image: "assets/laura/laura9.jpg", // Foto 5
                         message: "Esa pancitaaaa! Jajajajajajaja"
                     },
                     {
-                        image: "laura10.jpg", // Foto 6
+                        image: "assets/laura/laura10.jpg", // Foto 6
                         message: "Las orejitas que a veces te acomplejan, esa sonrisita que ilumina todo."
                     },
                     {
-                        image: "laura11.jpg", // Foto 5
+                        image: "assets/laura/laura11.jpg", // Foto 5
                         message: "y esa felicidad con la muchas veces vives los momentos, y trasmites a todos a tu alrededor."
                     },
                     {
-                        image: "laura12.jpg", // Foto 6
+                        image: "assets/laura/laura12.jpg", // Foto 6
                         message: "Esa mujer dedicada por aprender y crecer cada día"
                     },
                     {
-                        image: "laura13.jpg", // Foto 6
+                        image: "assets/laura/laura13.jpg", // Foto 6
                         message: "Jamas olvides seguir aprendiendo, la vida es hermosa y llena de oportunidades. y mereces todo, todoooo y mucho más de lo que crees"
                     },
                     {
-                        image: "laura14.jpg", // Foto 6
+                        image: "assets/laura/laura14.jpg", // Foto 6
                         message: "y para tu parte deportista de alto rendimiento, jamas dudes en seguir entrenando y en superarte cada día."
                     },
                     {
-                        image: "laura15.jpg", // Foto 6
+                        image: "assets/laura/laura15.jpg", // Foto 6
                         message: "Jamas te limites a creer en que no puedes mejorar, y de probar nuevos deportes, nuevas cosas, lo importante es moverse y nunca dejar de hacerlo."
                     },
                     {
-                        image: "laura16.jpg", // Foto 6
+                        image: "assets/laura/laura16.jpg", // Foto 6
                         message: "Jamas dejes de disfrutar la vida, de viajar, de recorrer el mundo, porque puedes llegar donde te lo propongas y más alla de eso, mucho más."
                     },
                     {
-                        image: "laura19.jpg", // Foto 6
+                        image: "assets/laura/laura19.jpg", // Foto 6
                         message: "Pero lo más importante en la vida"
                     },
                     {
-                        image: "laura20.jpg", // Foto 6
+                        image: "assets/laura/laura20.jpg", // Foto 6
                         message: "y quiero, y en realidad se que no lo vas a olvidar"
                     },
                     {
-                        image: "laura21.jpg", // Foto 6
+                        image: "assets/laura/laura21.jpg", // Foto 6
                         message: "Es que dejes de compartirla, y disfrutarla"
                     },
                     {
-                        image: "laura22.jpg", // Foto 6
+                        image: "assets/laura/laura22.jpg", // Foto 6
                         message: "Con todas las personas que amas, te amo mucho y se que"
                     },
                     {
-                        image: "laura23.jpg", // Foto 6
+                        image: "assets/laura/laura23.jpg", // Foto 6
                         message: "Matematicamente hablando tan solo he estado en el 8% de tu vida"
                     },
                     {
-                        image: "laura24.jpg", // Foto 6
+                        image: "assets/laura/laura24.jpg", // Foto 6
                         message: "pero quiero seguir compartiendo a tu lado y dar el mayor porcentaje posible de mi vida contigo. Con amor infinito Te ama Duvan capivara!"
                     }
                 ]
@@ -427,35 +483,10 @@
                 title: "Día 4: Memoria 📸",
                 content: "Mira esta foto de nosotros... (Aquí podrías poner una foto real)",
                 type: "image",
-                src: "foto_she.png"
+                src: "assets/laura/foto_she.png"
             },
             5: {
-                title: "Día 5: Mitad de Camino 🎈",
-                content: "¡Ya falta poco! Hoy te mereces un postre (invita el sistema jaja).",
-                type: "text"
-            },
-            6: {
-                title: "Día 6: Playlist 🎵",
-                content: "Hoy escucha esta canción y piensa en mí.",
-                type: "text"
-            },
-            7: {
-                title: "Día 7: Mini Juego 🎮",
-                content: "Pronto habrá un juego aquí...",
-                type: "text"
-            },
-            8: {
-                title: "Día 8: Carta 💌",
-                content: "Escribiendo algo muy especial para ti...",
-                type: "text"
-            },
-            9: {
-                title: "Día 9: Casi Casi... ⏳",
-                content: "Mañana es el gran día. No puedo esperar.",
-                type: "text"
-            },
-            10: {
-                title: "Día 10: ¡FELIZ CUMPLEAÑOS! 🎂",
+                title: "Día 5: ¡FELIZ CUMPLEAÑOS! 🎂",
                 content: "¡LLEGAMOS! Te amo con todo mi corazón. Eres la mejor.",
                 type: "special"
             }
@@ -463,31 +494,56 @@
 
         function initCalendar() {
             calendarGrid.innerHTML = '';
-            for (let i = 1; i <= 10; i++) {
+            const openedGifts = JSON.parse(localStorage.getItem('openedGifts') || '[]');
+
+            for (let i = 1; i <= 5; i++) {
                 const card = document.createElement('div');
                 card.classList.add('day-card');
 
-                // Lógica de bloqueo: si el día es mayor al actual, está bloqueado
+                let giftStatus = '🎁'; // Por defecto cerrado
+                let label = `Regalo ${i}`;
+                const isAlreadyOpened = openedGifts.includes(i);
+
                 if (!DEBUG_MODE && i > currentDay) {
                     card.classList.add('locked');
-                } else if (i < currentDay) {
+                    giftStatus = '🔒';
+                } else if (isAlreadyOpened || i < currentDay) {
                     card.classList.add('opened');
+                    giftStatus = '📦'; // Regalo abierto
+                    label = `Abierto`;
+                } else {
+                    card.classList.add('current');
+                    giftStatus = '🎁';
                 }
 
-                card.innerHTML = `<div class="day-number">${i}</div><div class="day-label">Mayo</div>`;
+                card.innerHTML = `
+                    <div class="gift-emoji">${giftStatus}</div>
+                    <div class="day-number">${i}</div>
+                    <div class="day-label">${label}</div>
+                `;
                 card.addEventListener('click', () => {
+                    playSound('click');
                     if (card.classList.contains('locked')) {
                         alert("¡Todavía no! Este regalo se abre el " + i + " de mayo. 🔒");
                         return;
                     }
-                    showDayContent(i);
+                    handleDayEntry(i);
                 });
                 calendarGrid.appendChild(card);
             }
         }
 
         function showDayContent(day) {
-            const s = surprises[day] || { title: "Día " + day, content: "Pronto habrá una sorpresa aquí...", type: "text" };
+            const s = surprises[day];
+            if (!s) return;
+
+            // Iniciar música si es el Regalo 1 (Married Life)
+            if (day === 1 && bgMusic) {
+                bgMusic.currentTime = 0;
+                bgMusic.play().catch(e => console.log("Auto-play blocked by browser. User interaction needed."));
+            }
+
+            showScreen('day-view');
             const titleEl = document.getElementById('day-view-title');
             const contentEl = document.getElementById('day-view-content');
 
@@ -551,14 +607,6 @@
         document.getElementById('btn-back-calendar').addEventListener('click', () => {
             showScreen('calendar');
             initCalendar();
-        });
-
-        btnStart.addEventListener('click', () => {
-            if (currentDay > 0) {
-                handleDayEntry(currentDay);
-            } else {
-                showScreen('rsvp');
-            }
         });
 
         function showSurprise(day) {
