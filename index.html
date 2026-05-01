@@ -46,6 +46,15 @@
         <button id="btn-start" class="btn btn-yes" style="margin-top: 2rem; width: 100%;">
             Press start
         </button>
+        <script>
+            // Actualizar texto del botón si ya empezó
+            document.addEventListener('DOMContentLoaded', () => {
+                const day = getCurrentDay();
+                if (day > 0 && day <= 10) {
+                    document.getElementById('btn-start').innerText = `Continuar: Día ${day}`;
+                }
+            });
+        </script>
     </div>
 
     <!-- Pantalla 2: El Reto -->
@@ -93,18 +102,53 @@
         </div>
     </div>
 
-    <div id="floating-text">¡Uy! Casi...</div>
-
-    <!-- Modal Sorpresa -->
-    <div id="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="modal-body"></div>
+    <!-- Pantalla 6: Vista de Día Específico (Full Screen) -->
+    <div class="container" id="day-view-screen" style="display: none; padding: 2rem;">
+        <div id="day-view-header">
+            <button class="btn-back" id="btn-back-calendar">⬅️ Volver</button>
+            <h2 id="day-view-title" style="font-family: 'Press Start 2P'; font-size: 1rem; color: #ff4d6d;">Día X</h2>
+        </div>
+        <div id="day-view-content"
+            style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+            <!-- Contenido dinámico aquí -->
         </div>
     </div>
 
+    <div id="floating-text">¡Uy! Casi...</div>
+
     <script>
         const DEBUG_MODE = true;
+
+        // Lógica de Día Actual
+        const urlParams = new URLSearchParams(window.location.search);
+        let forcedDay = parseInt(urlParams.get('day'));
+
+        function getCurrentDay() {
+            if (DEBUG_MODE && forcedDay) return forcedDay;
+            const today = new Date();
+            if (today.getMonth() !== 4) return 0; // Solo mayo
+            return today.getDate();
+        }
+
+        const currentDay = getCurrentDay();
+
+        window.addEventListener('load', () => {
+            if (forcedDay && forcedDay > 0 && forcedDay <= 10) {
+                // Si entra con un link de día, saltar directo al desbloqueo
+                handleDayEntry(forcedDay);
+            } else if (currentDay > 0) {
+                // Si es un día de mayo, personalizar el inicio
+                document.getElementById('btn-start').innerText = `Entrar al Día ${currentDay} 🎁`;
+            }
+        });
+
+        function handleDayEntry(day) {
+            document.getElementById('unlock-text').innerText = `¡DÍA ${day} DESBLOQUEADO!`;
+            showScreen('unlock');
+            setTimeout(() => {
+                showDayContent(day);
+            }, 2500);
+        }
 
         // Elementos de pantalla
         const screens = {
@@ -112,7 +156,8 @@
             rsvp: document.getElementById('rsvp-screen'),
             instructions: document.getElementById('instruction-screen'),
             unlock: document.getElementById('unlock-screen'),
-            calendar: document.getElementById('calendar-screen')
+            calendar: document.getElementById('calendar-screen'),
+            'day-view': document.getElementById('day-view-screen')
         };
 
         // Botones
@@ -174,18 +219,20 @@
             screens[screenId].style.display = 'flex';
             screens[screenId].style.flexDirection = 'column';
             screens[screenId].style.alignItems = 'center';
+            screens[screenId].style.justifyContent = 'center';
+            screens[screenId].style.height = '100vh';
+            screens[screenId].style.width = '100vw';
 
-            // Inicializar estado del botón SÍ al mostrar pantalla 2
             if (screenId === 'rsvp') {
                 noCount = 0;
                 scaleSi = INITIAL_SCALE;
                 btnSi.style.transform = `scale(${INITIAL_SCALE})`;
                 document.getElementById('meme-display').style.display = 'none';
-                
-                // Posicionar botón NO "alrededor" (fuera del flujo) para que SÍ esté en el centro
+
+                // Mover botón NO a posición segura
+                const x = Math.max(20, Math.min(window.innerWidth - btnNo.offsetWidth - 20, Math.random() * window.innerWidth));
+                const y = Math.max(20, Math.min(window.innerHeight - btnNo.offsetHeight - 20, Math.random() * window.innerHeight));
                 btnNo.style.position = 'fixed';
-                const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20);
-                const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20);
                 btnNo.style.left = `${x}px`;
                 btnNo.style.top = `${y}px`;
             }
@@ -229,9 +276,10 @@
             }
             memeCaption.innerText = currentMeme.caption;
 
-            // Mover el botón NO a posición aleatoria
-            const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20);
-            const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20);
+            // Mover el botón NO a posición aleatoria dentro de los límites
+            const padding = 50;
+            const x = Math.max(padding, Math.min(window.innerWidth - btnNo.offsetWidth - padding, Math.random() * window.innerWidth));
+            const y = Math.max(padding, Math.min(window.innerHeight - btnNo.offsetHeight - padding, Math.random() * window.innerHeight));
             btnNo.style.position = 'fixed';
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
@@ -247,7 +295,7 @@
             // Crecer botón SÍ exponencialmente
             scaleSi = INITIAL_SCALE * Math.pow(1.5, noCount);
             btnSi.style.transform = `scale(${scaleSi})`;
-            
+
             // Efecto de brillo si es muy grande
             if (noCount >= 5) {
                 btnSi.classList.add('btn-unlocked');
@@ -265,44 +313,273 @@
         });
 
         btnNextInstr.addEventListener('click', () => {
-            showScreen('unlock');
-            setTimeout(() => {
-                showScreen('calendar');
-                initCalendar();
-            }, 2000);
+            showScreen('calendar');
+            initCalendar();
         });
 
-        // Calendario
+        // Configuración de Sorpresas Diarias
         const surprises = {
-            1: { title: "Día 1: ¡Empezamos!", content: "Bienvenida a esta dinámica. Hoy empieza tu cuenta regresiva oficial.", type: "text" },
-            2: { title: "Día 2: Un mensaje", content: "Eres lo más bonito que me ha pasado. ❤️", type: "text" },
-            // ... (resto de sorpresas se mantienen)
+            1: {
+                title: "Día 1: Agradeciendo a tu Pasado 🌸",
+                type: "story",
+                slides: [
+                    {
+                        image: "laura1.jpg", // Foto 1
+                        message: "Hoy es tiempo de ver el pasado, de recordar y ver que cada paso que diste te trajo hasta aquí. Que lo curiosa que eras, lo tierna sigue contigo."
+                    },
+                    {
+                        image: "laura2.jpg", // Foto 2
+                        message: "Que esos crespitos sigan ahí acompañándote, aunque a veces te quejes de ellos. Lo que siempre ha estado contigo es esa ternura y esa forma tan tuya de ver el mundo."
+                    },
+                    {
+                        image: "laura3.jpg", // Foto 3
+                        message: "Esa capacidad de hacer sentir bien a todos... gracias por cada risa, cada sueño y cada paso que diste sin saber que un día nuestros caminos se cruzarían."
+                    },
+                    {
+                        image: "laura4.jpg", // Foto 4
+                        message: "Tu dulzura, con tu cabellito despeinado, como siempre queriendo salir en la foto."
+                    },
+                    {
+                        image: "laura5.jpg", // Foto 5
+                        message: "Como siempre una mujer cuidadora, dedicada, amorosa con su hermanita y su familia."
+                    },
+                    {
+                        image: "laura6.jpg", // Foto 6
+                        message: "Protegiendo a tu hermanita como siempre. Gracias por tanto amor."
+                    },
+                    {
+                        image: "laura7.jpg", // Foto 5
+                        message: "Desde niña rodeada de las personas que la aman, y que siempre te han apoyado y acompañado."
+                    },
+                    {
+                        image: "laura8.jpg", // Foto 6
+                        message: "Con esas miraditas tan tuyas y esa forma de vestir, desde siempre con buenos gustos"
+                    },
+                    {
+                        image: "laura9.jpg", // Foto 5
+                        message: "Esa pancitaaaa! Jajajajajajaja"
+                    },
+                    {
+                        image: "laura10.jpg", // Foto 6
+                        message: "Las orejitas que a veces te acomplejan, esa sonrisita que ilumina todo."
+                    },
+                    {
+                        image: "laura11.jpg", // Foto 5
+                        message: "y esa felicidad con la muchas veces vives los momentos, y trasmites a todos a tu alrededor."
+                    },
+                    {
+                        image: "laura12.jpg", // Foto 6
+                        message: "Esa mujer dedicada por aprender y crecer cada día"
+                    },
+                    {
+                        image: "laura13.jpg", // Foto 6
+                        message: "Jamas olvides seguir aprendiendo, la vida es hermosa y llena de oportunidades. y mereces todo, todoooo y mucho más de lo que crees"
+                    },
+                    {
+                        image: "laura14.jpg", // Foto 6
+                        message: "y para tu parte deportista de alto rendimiento, jamas dudes en seguir entrenando y en superarte cada día."
+                    },
+                    {
+                        image: "laura15.jpg", // Foto 6
+                        message: "Jamas te limites a creer en que no puedes mejorar, y de probar nuevos deportes, nuevas cosas, lo importante es moverse y nunca dejar de hacerlo."
+                    },
+                    {
+                        image: "laura16.jpg", // Foto 6
+                        message: "Jamas dejes de disfrutar la vida, de viajar, de recorrer el mundo, porque puedes llegar donde te lo propongas y más alla de eso, mucho más."
+                    },
+                    {
+                        image: "laura19.jpg", // Foto 6
+                        message: "Pero lo más importante en la vida"
+                    },
+                    {
+                        image: "laura20.jpg", // Foto 6
+                        message: "y quiero, y en realidad se que no lo vas a olvidar"
+                    },
+                    {
+                        image: "laura21.jpg", // Foto 6
+                        message: "Es que dejes de compartirla, y disfrutarla"
+                    },
+                    {
+                        image: "laura22.jpg", // Foto 6
+                        message: "Con todas las personas que amas, te amo mucho y se que"
+                    },
+                    {
+                        image: "laura23.jpg", // Foto 6
+                        message: "Matematicamente hablando tan solo he estado en el 8% de tu vida"
+                    },
+                    {
+                        image: "laura24.jpg", // Foto 6
+                        message: "pero quiero seguir compartiendo a tu lado y dar el mayor porcentaje posible de mi vida contigo. Con amor infinito Te ama Duvan capivara!"
+                    }
+                ]
+            },
+            2: {
+                title: "Día 2: Tu Sonrisa ✨",
+                content: "Amo cómo se iluminan tus ojos cuando te ríes. Eres mi lugar favorito.",
+                type: "text"
+            },
+            3: {
+                title: "Día 3: Un Reto 🧩",
+                content: "Hoy tu reto es decirme 3 cosas que te gusten de nosotros.",
+                type: "text"
+            },
+            4: {
+                title: "Día 4: Memoria 📸",
+                content: "Mira esta foto de nosotros... (Aquí podrías poner una foto real)",
+                type: "image",
+                src: "foto_she.png"
+            },
+            5: {
+                title: "Día 5: Mitad de Camino 🎈",
+                content: "¡Ya falta poco! Hoy te mereces un postre (invita el sistema jaja).",
+                type: "text"
+            },
+            6: {
+                title: "Día 6: Playlist 🎵",
+                content: "Hoy escucha esta canción y piensa en mí.",
+                type: "text"
+            },
+            7: {
+                title: "Día 7: Mini Juego 🎮",
+                content: "Pronto habrá un juego aquí...",
+                type: "text"
+            },
+            8: {
+                title: "Día 8: Carta 💌",
+                content: "Escribiendo algo muy especial para ti...",
+                type: "text"
+            },
+            9: {
+                title: "Día 9: Casi Casi... ⏳",
+                content: "Mañana es el gran día. No puedo esperar.",
+                type: "text"
+            },
+            10: {
+                title: "Día 10: ¡FELIZ CUMPLEAÑOS! 🎂",
+                content: "¡LLEGAMOS! Te amo con todo mi corazón. Eres la mejor.",
+                type: "special"
+            }
         };
 
         function initCalendar() {
             calendarGrid.innerHTML = '';
-            const today = new Date();
             for (let i = 1; i <= 10; i++) {
-                const dayDate = new Date(today.getFullYear(), 4, i);
                 const card = document.createElement('div');
                 card.classList.add('day-card');
-                if (!DEBUG_MODE && today < dayDate) card.classList.add('locked');
+
+                // Lógica de bloqueo: si el día es mayor al actual, está bloqueado
+                if (!DEBUG_MODE && i > currentDay) {
+                    card.classList.add('locked');
+                } else if (i < currentDay) {
+                    card.classList.add('opened');
+                }
+
                 card.innerHTML = `<div class="day-number">${i}</div><div class="day-label">Mayo</div>`;
                 card.addEventListener('click', () => {
                     if (card.classList.contains('locked')) {
-                        alert("¡Todavía no! Espera al " + i + " de mayo.");
+                        alert("¡Todavía no! Este regalo se abre el " + i + " de mayo. 🔒");
                         return;
                     }
-                    showSurprise(i);
+                    showDayContent(i);
                 });
                 calendarGrid.appendChild(card);
             }
         }
 
+        function showDayContent(day) {
+            const s = surprises[day] || { title: "Día " + day, content: "Pronto habrá una sorpresa aquí...", type: "text" };
+            const titleEl = document.getElementById('day-view-title');
+            const contentEl = document.getElementById('day-view-content');
+
+            titleEl.innerText = s.title;
+
+            if (s.type === 'story') {
+                let currentSlide = 0;
+                const updateSlide = () => {
+                    const slide = s.slides[currentSlide];
+                    contentEl.innerHTML = `
+                        <div class="story-container" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center;">
+                            <div class="photo-container" style="width: 280px; height: 280px; margin-bottom: 2rem;">
+                                <img src="${slide.image}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                            </div>
+                            <p style="font-size: 1.1rem; color: #ff758f; text-align: center; padding: 0 1rem; line-height: 1.4;">${slide.message}</p>
+                            <div style="margin-top: auto; display: flex; gap: 1rem; padding-bottom: 2rem;">
+                                <button id="prev-slide" class="btn" style="padding: 0.5rem 1rem; font-size: 0.7rem; display: ${currentSlide === 0 ? 'none' : 'block'}">⬅️</button>
+                                <button id="next-slide" class="btn btn-yes" style="padding: 0.5rem 1rem; font-size: 0.7rem;">${currentSlide === s.slides.length - 1 ? 'Finalizar ❤️' : 'Siguiente ➡️'}</button>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('next-slide').onclick = () => {
+                        if (currentSlide < s.slides.length - 1) {
+                            currentSlide++;
+                            updateSlide();
+                        } else {
+                            confetti({ particleCount: 150, spread: 70 });
+                            showScreen('calendar');
+                            initCalendar();
+                        }
+                    };
+
+                    const prevBtn = document.getElementById('prev-slide');
+                    if (prevBtn) {
+                        prevBtn.onclick = () => {
+                            currentSlide--;
+                            updateSlide();
+                        };
+                    }
+                };
+                updateSlide();
+            } else {
+                let html = `<p style="font-size: 1.3rem; color: #ff758f; margin-bottom: 2rem; max-width: 90%;">${s.content}</p>`;
+                if (s.type === 'interactive') {
+                    html += `<button id="day-action-btn" class="btn btn-yes" style="padding: 1rem 2rem;">${s.action}</button>`;
+                } else if (s.type === 'image') {
+                    html += `<div class="photo-container" style="width: 250px; height: 250px; transform: rotate(0deg);"><img src="${s.src}"></div>`;
+                }
+                contentEl.innerHTML = html;
+
+                const actionBtn = document.getElementById('day-action-btn');
+                if (actionBtn && s.onAction) {
+                    actionBtn.onclick = s.onAction;
+                }
+            }
+            showScreen('day-view');
+        }
+
+        // Eventos de botones
+        document.getElementById('btn-back-calendar').addEventListener('click', () => {
+            showScreen('calendar');
+            initCalendar();
+        });
+
+        btnStart.addEventListener('click', () => {
+            if (currentDay > 0) {
+                handleDayEntry(currentDay);
+            } else {
+                showScreen('rsvp');
+            }
+        });
+
         function showSurprise(day) {
             const s = surprises[day] || { title: "Día " + day, content: "Pronto habrá una sorpresa aquí...", type: "text" };
-            modalBody.innerHTML = `<h2 style="color: #ff007f; margin-bottom: 1rem;">${s.title}</h2><p>${s.content}</p>`;
+
+            let html = `<h2 style="color: #ff4d6d; margin-bottom: 1rem; font-family: 'Press Start 2P'; font-size: 1.2rem;">${s.title}</h2>`;
+            html += `<p style="font-size: 1.1rem; color: #ff758f;">${s.content}</p>`;
+
+            if (s.type === 'interactive') {
+                html += `<button id="modal-action-btn" class="btn btn-yes" style="margin-top: 1rem; padding: 0.8rem;">${s.action}</button>`;
+            } else if (s.type === 'image') {
+                html += `<img src="${s.src}" style="width: 100%; border-radius: 15px; margin-top: 1rem; border: 3px solid #ffb3c1;">`;
+            }
+
+            modalBody.innerHTML = html;
             modal.style.display = 'flex';
+
+            const actionBtn = document.getElementById('modal-action-btn');
+            if (actionBtn && s.onAction) {
+                actionBtn.onclick = s.onAction;
+            }
         }
 
         closeModal.onclick = () => modal.style.display = 'none';
