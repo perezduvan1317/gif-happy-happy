@@ -80,7 +80,7 @@
         <h1>Manual de Instrucciones 📑</h1>
         <div
             style="text-align: left; background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 20px; margin-bottom: 2rem;">
-            <p>🔊 ¡Sube el volumen! Habrá sonidos y música especial (no te asustes 😉).</p>
+            <p>🎵 ¡Sube el volumen! Hay música especial preparada para ti.</p>
             <p>✨ Te llegará una notificación cada vez que haya un regalito nuevo para ti.</p>
             <p>📱 La aplicación siempre estará disponible con los regalitos que ya hayas abierto.</p>
             <p>💬 Si tienes cualquier duda, puedes escribirme directamente a mi WhatsApp.</p>
@@ -120,7 +120,7 @@
     <audio id="bg-music" src="assets/music/10 - Married Life (Piano Version).mp3"></audio>
 
     <script>
-        const DEBUG_MODE = true;
+        const DEBUG_MODE = false;
 
         // Lógica de Día Actual
         const urlParams = new URLSearchParams(window.location.search);
@@ -136,12 +136,18 @@
         const currentDay = getCurrentDay();
 
         window.addEventListener('load', () => {
+            const acceptedRSVP = localStorage.getItem('acceptedRSVP');
+
             if (forcedDay && forcedDay > 0 && forcedDay <= 5) {
                 // Si entra con un link de día, saltar directo al desbloqueo
                 handleDayEntry(forcedDay);
             } else if (currentDay > 0) {
-                // Para pruebas, siempre texto de inicio
-                btnStart.innerText = `Press Start 🎮`;
+                // Si ya aceptó y es un día posterior al 1, cambiar texto
+                if (acceptedRSVP && currentDay > 1) {
+                    btnStart.innerText = `Abrir Regalo #${currentDay} 🎁`;
+                } else {
+                    btnStart.innerText = `Press Start 🎮`;
+                }
             }
         });
 
@@ -245,50 +251,48 @@
         }, 1000);
 
         // Generador de Sonidos Sintetizados (Web Audio API)
+        // Generador de Sonidos Sintetizados (Versión Suave)
         function playSound(type) {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            if (ctx.state === 'suspended') ctx.resume(); // Necesario para móviles
+            if (ctx.state === 'suspended') ctx.resume();
 
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-
             osc.connect(gain);
             gain.connect(ctx.destination);
-
             const now = ctx.currentTime;
 
             if (type === 'yes') {
-                // Sonido alegre ascendente
+                // Campanita alegre (Chime)
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.frequency.setValueAtTime(660, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
                 osc.start(now);
-                osc.stop(now + 0.2);
+                osc.stop(now + 0.5);
             } else if (type === 'no') {
-                // Sonido de rebote
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.linearRampToValueAtTime(100, now + 0.1);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } else {
-                // Click estándar
+                // Pop de burbuja
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, now);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(10, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
                 osc.start(now);
-                osc.stop(now + 0.05);
+                osc.stop(now + 0.08);
+            } else {
+                // Click sutil
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                osc.start(now);
+                osc.stop(now + 0.03);
             }
         }
 
         // Lógica Botón NO (optimizado para móvil: click, no hover)
         function handleNoClick() {
-            playSound('no');
             noCount++;
 
             // Mostrar meme en secuencia (cicla si hay más clics que memes)
@@ -347,6 +351,7 @@
         // Eventos
         btnStart.addEventListener('click', () => {
             playSound('click');
+            // Siempre mostrar la pregunta del SÍ/NO por el chiste de los memes
             showScreen('rsvp');
         });
         btnNo.addEventListener('click', handleNoClick);
@@ -363,9 +368,18 @@
                 }).catch(e => console.log("Audio priming failed", e));
             }
 
+            const alreadyAccepted = localStorage.getItem('acceptedRSVP');
             localStorage.setItem('acceptedRSVP', 'true'); // Guardar que ya aceptó
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            showScreen('instructions');
+
+            if (alreadyAccepted) {
+                // Si ya aceptó antes, ir directo al calendario
+                showScreen('calendar');
+                initCalendar();
+            } else {
+                // La primera vez, mostrar instrucciones
+                showScreen('instructions');
+            }
         });
 
         btnNextInstr.addEventListener('click', () => {
@@ -387,7 +401,7 @@
         // Configuración de Sorpresas Diarias
         const surprises = {
             1: {
-                title: "Día 1: Agradeciendo a tu Pasado 🌸",
+                title: "Agradeciendo a tu Pasado 🌸",
                 type: "story",
                 slides: [
                     {
@@ -534,14 +548,13 @@
                 `;
                 card.addEventListener('click', () => {
                     playSound('click');
-
                     // "Priming" específico para el Regalo 1
                     if (i === 1 && bgMusic) {
                         bgMusic.play().then(() => bgMusic.pause()).catch(e => { });
                     }
 
                     if (card.classList.contains('locked')) {
-                        alert("¡Todavía no! Este regalo se abre el " + i + " de mayo. 🔒");
+                        alert("¡Todavía no! Este regalito aún está guardado. 🔒");
                         return;
                     }
                     handleDayEntry(i);
@@ -575,7 +588,7 @@
                             <div class="photo-container" style="width: 280px; height: 280px; margin-bottom: 2rem;">
                                 <img src="${slide.image}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
                             </div>
-                            <p style="font-size: 1.1rem; color: #ff758f; text-align: center; padding: 0 1rem; line-height: 1.4;">${slide.message}</p>
+                            <p style="font-size: 1.4rem; color: #ff758f; text-align: center; padding: 0 1rem; line-height: 1.4; font-weight: bold;">${slide.message}</p>
                             <div style="margin-top: auto; display: flex; gap: 1rem; padding-bottom: 2rem;">
                                 <button id="prev-slide" class="btn" style="padding: 0.5rem 1rem; font-size: 0.7rem; display: ${currentSlide === 0 ? 'none' : 'block'}">⬅️</button>
                                 <button id="next-slide" class="btn btn-yes" style="padding: 0.5rem 1rem; font-size: 0.7rem;">${currentSlide === s.slides.length - 1 ? 'Finalizar ❤️' : 'Siguiente ➡️'}</button>
@@ -588,6 +601,11 @@
                             currentSlide++;
                             updateSlide();
                         } else {
+                            // Detener música al finalizar
+                            if (bgMusic) {
+                                bgMusic.pause();
+                                bgMusic.currentTime = 0;
+                            }
                             confetti({ particleCount: 150, spread: 70 });
                             showScreen('calendar');
                             initCalendar();
