@@ -247,6 +247,8 @@
         // Generador de Sonidos Sintetizados (Web Audio API)
         function playSound(type) {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') ctx.resume(); // Necesario para móviles
+
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
 
@@ -352,6 +354,15 @@
         btnSi.addEventListener('click', () => {
             if (btnSi.disabled) return;
             playSound('yes');
+
+            // "Desbloquear" música en móviles desde el primer clic
+            if (bgMusic) {
+                bgMusic.play().then(() => {
+                    bgMusic.pause();
+                    bgMusic.currentTime = 0;
+                }).catch(e => console.log("Audio priming failed", e));
+            }
+
             localStorage.setItem('acceptedRSVP', 'true'); // Guardar que ya aceptó
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             showScreen('instructions');
@@ -523,6 +534,12 @@
                 `;
                 card.addEventListener('click', () => {
                     playSound('click');
+
+                    // "Priming" específico para el Regalo 1
+                    if (i === 1 && bgMusic) {
+                        bgMusic.play().then(() => bgMusic.pause()).catch(e => { });
+                    }
+
                     if (card.classList.contains('locked')) {
                         alert("¡Todavía no! Este regalo se abre el " + i + " de mayo. 🔒");
                         return;
