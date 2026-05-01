@@ -372,8 +372,8 @@
                 for (const el of forbiddenElements) {
                     if (!el || el.offsetParent === null) continue; // Si no es visible o no está en el DOM
                     const rect = el.getBoundingClientRect();
-                    // Margen de seguridad extra para que no roce
-                    const margin = 30;
+                    // Margen de seguridad adaptativo: menor en móviles para no quedar atrapado
+                    const margin = window.innerWidth < 500 ? 15 : 30;
                     if (btnRect.left < rect.right + margin &&
                         btnRect.right > rect.left - margin &&
                         btnRect.top < rect.bottom + margin &&
@@ -391,12 +391,13 @@
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
 
-            // Crecer botón SÍ exponencialmente
-            scaleSi = INITIAL_SCALE * Math.pow(1.5, noCount);
+            // Crecer botón SÍ exponencialmente con tope para no tapar toda la pantalla en móvil
+            const maxScale = window.innerWidth < 500 ? 2.2 : 4;
+            scaleSi = Math.min(maxScale, INITIAL_SCALE * Math.pow(1.4, noCount));
             btnSi.style.transform = `scale(${scaleSi})`;
 
-            // Efecto de brillo si es muy grande
-            if (noCount >= 5) {
+            // Efecto de brillo si es muy grande o si ya se hicieron varios clics
+            if (noCount >= 4 || scaleSi >= 1.5) {
                 btnSi.classList.add('btn-unlocked');
             }
         }

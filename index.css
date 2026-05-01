@@ -175,7 +175,8 @@ p {
 
 /* Meme Display */
 #meme-display {
-    width: 280px; /* Aumentado de 120px */
+    width: 90%;
+    max-width: 280px; /* Aumentado de 120px */
     margin: 0.5rem auto;
     border-radius: 20px;
     overflow: hidden;
@@ -189,8 +190,8 @@ p {
 #meme-display img {
     width: 100%;
     height: auto;
-    max-height: 280px; /* Aumentado de 120px */
-    object-fit: cover;
+    max-height: 50vh; /* Ajustado para que no ocupe toda la pantalla en móvil */
+    object-fit: contain; /* Cambiado a contain para que se vea la imagen completa */
 }
 
 #meme-caption {
