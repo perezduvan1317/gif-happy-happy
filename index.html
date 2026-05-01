@@ -229,12 +229,39 @@
                 btnSi.style.transform = `scale(${INITIAL_SCALE})`;
                 document.getElementById('meme-display').style.display = 'none';
 
-                // Mover botón NO a posición segura
-                const x = Math.max(20, Math.min(window.innerWidth - btnNo.offsetWidth - 20, Math.random() * window.innerWidth));
-                const y = Math.max(20, Math.min(window.innerHeight - btnNo.offsetHeight - 20, Math.random() * window.innerHeight));
+                // Mover botón NO a posición segura evitando el botón SÍ y el título
+                const forbiddenInitial = [
+                    document.getElementById('btn-si'),
+                    document.querySelector('#rsvp-screen h1')
+                ];
+                let initX, initY;
+                let initAttempts = 0;
+                const bW = btnNo.offsetWidth || 100;
+                const bH = btnNo.offsetHeight || 50;
+
+                do {
+                    initX = Math.max(20, Math.min(window.innerWidth - bW - 20, Math.random() * (window.innerWidth - bW)));
+                    initY = Math.max(20, Math.min(window.innerHeight - bH - 20, Math.random() * (window.innerHeight - bH)));
+
+                    let overlap = false;
+                    const bRect = { left: initX, top: initY, right: initX + bW, bottom: initY + bH };
+
+                    for (const el of forbiddenInitial) {
+                        if (!el || el.offsetParent === null) continue;
+                        const rect = el.getBoundingClientRect();
+                        if (bRect.left < rect.right + 40 && bRect.right > rect.left - 40 &&
+                            bRect.top < rect.bottom + 40 && bRect.bottom > rect.top - 40) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (!overlap) break;
+                    initAttempts++;
+                } while (initAttempts < 50);
+
                 btnNo.style.position = 'fixed';
-                btnNo.style.left = `${x}px`;
-                btnNo.style.top = `${y}px`;
+                btnNo.style.left = `${initX}px`;
+                btnNo.style.top = `${initY}px`;
             }
         }
 
@@ -317,22 +344,48 @@
             }
             memeCaption.innerText = currentMeme.caption;
 
-            // Mover el botón NO a posición aleatoria evitando el área del meme
-            const padding = 50;
-            const memeRect = memeDisplay.getBoundingClientRect();
+            // Mover el botón NO a posición aleatoria evitando el área del meme, el botón SÍ y el título
+            const padding = 20;
+            const forbiddenElements = [
+                document.getElementById('meme-display'),
+                document.getElementById('btn-si'),
+                document.querySelector('#rsvp-screen h1')
+            ];
+
             let x, y;
             let attempts = 0;
+            const btnWidth = btnNo.offsetWidth || 100;
+            const btnHeight = btnNo.offsetHeight || 50;
 
             do {
-                x = Math.max(padding, Math.min(window.innerWidth - btnNo.offsetWidth - padding, Math.random() * window.innerWidth));
-                y = Math.max(padding, Math.min(window.innerHeight - btnNo.offsetHeight - padding, Math.random() * window.innerHeight));
+                x = Math.max(padding, Math.min(window.innerWidth - btnWidth - padding, Math.random() * (window.innerWidth - btnWidth)));
+                y = Math.max(padding, Math.min(window.innerHeight - btnHeight - padding, Math.random() * (window.innerHeight - btnHeight)));
+
+                let hasOverlap = false;
+                const btnRect = {
+                    left: x,
+                    top: y,
+                    right: x + btnWidth,
+                    bottom: y + btnHeight
+                };
+
+                for (const el of forbiddenElements) {
+                    if (!el || el.offsetParent === null) continue; // Si no es visible o no está en el DOM
+                    const rect = el.getBoundingClientRect();
+                    // Margen de seguridad extra para que no roce
+                    const margin = 30;
+                    if (btnRect.left < rect.right + margin &&
+                        btnRect.right > rect.left - margin &&
+                        btnRect.top < rect.bottom + margin &&
+                        btnRect.bottom > rect.top - margin) {
+                        hasOverlap = true;
+                        break;
+                    }
+                }
+
+                if (!hasOverlap) break;
                 attempts++;
-                // Intentar encontrar un hueco que no choque con el meme (máximo 20 intentos)
-            } while (attempts < 20 &&
-            x < memeRect.right + 20 &&
-            x + btnNo.offsetWidth > memeRect.left - 20 &&
-            y < memeRect.bottom + 20 &&
-                y + btnNo.offsetHeight > memeRect.top - 20);
+            } while (attempts < 100);
 
             btnNo.style.position = 'fixed';
             btnNo.style.left = `${x}px`;
@@ -478,7 +531,7 @@
                     },
                     {
                         image: "assets/laura/laura21.jpg", // Foto 6
-                        message: "Es que dejes de compartirla, y disfrutarla"
+                        message: "Es que no dejes de compartirla, y disfrutarla"
                     },
                     {
                         image: "assets/laura/laura22.jpg", // Foto 6
