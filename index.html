@@ -117,7 +117,7 @@
     </div>
 
     <!-- Elemento de Audio Oculto -->
-    <audio id="bg-music" src="assets/music/10 - Married Life (Piano Version).mp3"></audio>
+    <audio id="bg-music" src="assets/music/10 - Married Life (Piano Version).mp3" loop></audio>
 
     <script>
         const DEBUG_MODE = false;
@@ -347,8 +347,7 @@
             // Mover el botón NO a posición aleatoria evitando el área del meme, el botón SÍ y el título
             const padding = 20;
             const forbiddenElements = [
-                document.getElementById('meme-display'),
-                document.getElementById('btn-si'),
+                document.getElementById('meme-caption'),
                 document.querySelector('#rsvp-screen h1')
             ];
 
@@ -370,14 +369,17 @@
                 };
 
                 for (const el of forbiddenElements) {
-                    if (!el || el.offsetParent === null) continue; // Si no es visible o no está en el DOM
+                    if (!el || el.offsetParent === null) continue;
                     const rect = el.getBoundingClientRect();
-                    // Margen de seguridad adaptativo: menor en móviles para no quedar atrapado
-                    const margin = window.innerWidth < 500 ? 15 : 30;
-                    if (btnRect.left < rect.right + margin &&
-                        btnRect.right > rect.left - margin &&
-                        btnRect.top < rect.bottom + margin &&
-                        btnRect.bottom > rect.top - margin) {
+
+                    // Margen de seguridad más agresivo para evitar el texto
+                    const marginX = window.innerWidth < 500 ? 25 : 45;
+                    const marginY = window.innerWidth < 500 ? 50 : 70;
+
+                    if (btnRect.left < rect.right + marginX &&
+                        btnRect.right > rect.left - marginX &&
+                        btnRect.top < rect.bottom + marginY &&
+                        btnRect.bottom > rect.top - marginY) {
                         hasOverlap = true;
                         break;
                     }
@@ -385,19 +387,18 @@
 
                 if (!hasOverlap) break;
                 attempts++;
-            } while (attempts < 100);
+            } while (attempts < 200);
 
             btnNo.style.position = 'fixed';
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
 
-            // Crecer botón SÍ exponencialmente con tope para no tapar toda la pantalla en móvil
-            const maxScale = window.innerWidth < 500 ? 2.2 : 4;
-            scaleSi = Math.min(maxScale, INITIAL_SCALE * Math.pow(1.4, noCount));
+            // Crecer botón SÍ exponencialmente (¡Ahora sin límites para que crezca harto!)
+            scaleSi = INITIAL_SCALE * Math.pow(1.5, noCount);
             btnSi.style.transform = `scale(${scaleSi})`;
 
-            // Efecto de brillo si es muy grande o si ya se hicieron varios clics
-            if (noCount >= 4 || scaleSi >= 1.5) {
+            // Efecto de brillo
+            if (noCount >= 4) {
                 btnSi.classList.add('btn-unlocked');
             }
         }

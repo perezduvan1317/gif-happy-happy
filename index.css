@@ -128,13 +128,14 @@ p {
     background: #ff4d6d;
     color: white;
     border: 4px solid #fff;
+    z-index: 1; /* Mantenerlo al fondo cuando crezca mucho */
 }
 
 .btn-no {
     background: #fff;
     color: #ff4d6d;
     border: 4px solid #ff758f;
-    z-index: 50;
+    z-index: 100; /* Siempre encima de todo para ser clickable */
     transition: left 0.3s ease, top 0.3s ease;
 }
 
@@ -185,6 +186,12 @@ p {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 10px 25px rgba(255, 117, 143, 0.3);
+    position: relative;
+    z-index: 80; /* Encima del botón SÍ pero debajo del botón NO */
+    min-height: 300px; /* RESERVA ESPACIO PARA QUE EL BOTÓN NO NO LO TAPE ANTES DE CARGAR LA IMAGEN */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 #meme-display img {
