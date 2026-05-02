@@ -121,6 +121,7 @@
 
     <script>
         const DEBUG_MODE = false;
+        const UNLOCKED_DAYS = [1]; // Control manual de días desbloqueados
 
         // Lógica de Día Actual
         const urlParams = new URLSearchParams(window.location.search);
@@ -128,9 +129,8 @@
 
         function getCurrentDay() {
             if (DEBUG_MODE && forcedDay) return forcedDay;
-            const today = new Date();
-            if (today.getMonth() !== 4) return 0; // Solo mayo
-            return today.getDate();
+            // Retornamos el último día desbloqueado manualmente
+            return Math.max(...UNLOCKED_DAYS);
         }
 
         const currentDay = getCurrentDay();
@@ -142,8 +142,8 @@
                 // Si entra con un link de día, saltar directo al desbloqueo
                 handleDayEntry(forcedDay);
             } else if (currentDay > 0) {
-                // Si ya aceptó y es un día posterior al 1, cambiar texto
-                if (acceptedRSVP && currentDay > 1) {
+                // Si ya aceptó y es un día desbloqueado, cambiar texto
+                if (acceptedRSVP && currentDay >= 1) {
                     btnStart.innerText = `Abrir Regalo #${currentDay} 🎁`;
                 } else {
                     btnStart.innerText = `Press Start 🎮`;
@@ -583,8 +583,9 @@
                 let giftStatus = '🎁'; // Por defecto cerrado
                 let label = `Regalo ${i}`;
                 const isAlreadyOpened = openedGifts.includes(i);
+                const isUnlocked = UNLOCKED_DAYS.includes(i);
 
-                if (!DEBUG_MODE && i > currentDay) {
+                if (!DEBUG_MODE && !isUnlocked) {
                     card.classList.add('locked');
                     giftStatus = '🔒';
                 } else if (isAlreadyOpened || i < currentDay) {
