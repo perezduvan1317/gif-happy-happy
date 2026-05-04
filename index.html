@@ -11,6 +11,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="index.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://player.vimeo.com/api/player.js"></script>
 </head>
 
 <body>
@@ -447,6 +448,11 @@
                 bgMusic.pause();
                 bgMusic.currentTime = 0;
             }
+            // Detener todos los videos
+            document.querySelectorAll('video').forEach(v => {
+                v.pause();
+                v.currentTime = 0;
+            });
             showScreen('calendar');
             initCalendar();
         });
@@ -548,9 +554,11 @@
                 ]
             },
             2: {
-                title: "Día 2: Tu Sonrisa ✨",
-                content: "Amo cómo se iluminan tus ojos cuando te ríes. Eres mi lugar favorito.",
-                type: "text"
+                title: "Día 2: Un Momento Especial 🎬",
+                type: "video-gift",
+                introVideo: "https://vimeo.com/1188917658",
+                mainVideo: "https://vimeo.com/1188917656",
+                correctPin: "0504" // Por defecto 0504 (Mayo 4).
             },
             3: {
                 title: "Día 3: Un Reto 🧩",
@@ -674,6 +682,131 @@
                     }
                 };
                 updateSlide();
+            } else if (s.type === 'video-gift') {
+                contentEl.innerHTML = `
+                    <div class="video-gift-container" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                        <p id="video-instruction" style="margin-bottom: 1rem; font-size: 1rem; color: #ff4d6d; font-weight: bold;">Mira este pequeño video antes de la sorpresa...</p>
+                        
+                        <div class="video-reel-container" id="intro-video-container">
+                            <video id="gift-video" playsinline webkit-playsinline controls>
+                                <source src="${s.introVideo}" type="video/mp4">
+                                Tu navegador no soporta videos.
+                            </video>
+                        </div>
+
+                        <div id="pin-section" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+                            <p style="color: #ff4d6d; font-weight: bold; margin-bottom: 1rem;">¡Excelente! Ahora introduce la clave de 4 dígitos para el video principal:</p>
+                            <div class="pin-container">
+                                <div class="pin-inputs">
+                                    <input type="text" inputmode="numeric" class="pin-digit" maxlength="1" oninput="focusNext(this, 0)" onkeydown="focusPrev(event, 0)">
+                                    <input type="text" inputmode="numeric" class="pin-digit" maxlength="1" oninput="focusNext(this, 1)" onkeydown="focusPrev(event, 1)">
+                                    <input type="text" inputmode="numeric" class="pin-digit" maxlength="1" oninput="focusNext(this, 2)" onkeydown="focusPrev(event, 2)">
+                                    <input type="text" inputmode="numeric" class="pin-digit" maxlength="1" oninput="focusNext(this, 3)" onkeydown="focusPrev(event, 3)">
+                                </div>
+                                <button id="btn-verify-pin" class="btn btn-yes" style="margin-top: 1.5rem; font-size: 0.6rem; padding: 0.8rem;">Verificar Clave</button>
+                            </div>
+                        </div>
+
+                        <div id="main-video-section" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+                            <p style="color: #ff4d6d; font-weight: bold; margin-bottom: 1rem;">✨ ¡Correcto! Disfruta tu regalo principal: ✨</p>
+                            <div class="video-reel-container" id="main-video-container">
+                                <!-- El contenido se genera dinámicamente según si es YouTube o MP4 -->
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const introContainer = document.getElementById('intro-video-container');
+                const instruction = document.getElementById('video-instruction');
+                const pinSection = document.getElementById('pin-section');
+                const mainVideoSection = document.getElementById('main-video-section');
+
+                const onIntroEnded = () => {
+                    introContainer.style.display = 'none';
+                    instruction.style.display = 'none';
+                    pinSection.style.display = 'flex';
+                    contentEl.querySelector('.pin-digit').focus();
+                };
+
+                if (s.introVideo.includes('vimeo.com')) {
+                    const vimeoId = s.introVideo.split('/').pop().split('?')[0];
+                    introContainer.innerHTML = `
+                        <iframe id="intro-vimeo" src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&badge=0&autopause=0" 
+                                frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen 
+                                style="width: 100%; height: 100%; border-radius: 20px;">
+                        </iframe>
+                    `;
+                    const player = new Vimeo.Player(document.getElementById('intro-vimeo'));
+                    player.on('ended', onIntroEnded);
+                } else {
+                    const video = document.getElementById('gift-video');
+                    if (video) video.onended = onIntroEnded;
+                }
+
+                document.getElementById('btn-verify-pin').onclick = () => {
+                    const digits = contentEl.querySelectorAll('.pin-digit');
+                    const enteredPin = Array.from(digits).map(d => d.value).join('');
+
+                    if (enteredPin === s.correctPin) {
+                        playSound('yes');
+                        confetti({ particleCount: 150, spread: 70 });
+                        pinSection.style.display = 'none';
+
+                        const mainContainer = document.getElementById('main-video-container');
+
+                        if (s.mainVideo.includes('vimeo.com')) {
+                            // Extraer ID de Vimeo
+                            const vimeoId = s.mainVideo.split('/').pop().split('?')[0];
+                            mainContainer.innerHTML = `
+                                <iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&badge=0&autopause=0" 
+                                        frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen 
+                                        style="width: 100%; height: 100%; border-radius: 15px;">
+                                </iframe>
+                            `;
+                        } else if (s.mainVideo.includes('youtube.com') || s.mainVideo.includes('youtu.be')) {
+                            // Extraer ID de YouTube
+                            let videoId = s.mainVideo.split('/').pop();
+                            if (videoId.includes('watch?v=')) videoId = videoId.split('watch?v=')[1];
+                            videoId = videoId.split('&')[0].split('?')[0];
+
+                            mainContainer.innerHTML = `
+                                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowfullscreen
+                                        style="width: 100%; height: 100%; border-radius: 15px;">
+                                </iframe>
+                            `;
+                        } else {
+                            mainContainer.innerHTML = `
+                                <video id="main-video" playsinline webkit-playsinline controls autoplay>
+                                    <source src="${s.mainVideo}" type="video/mp4">
+                                </video>
+                            `;
+                        }
+
+                        mainVideoSection.style.display = 'flex';
+                    } else {
+                        playSound('no');
+                        alert("¡Clave incorrecta! Inténtalo de nuevo. ❤️");
+                        digits.forEach(d => d.value = '');
+                        digits[0].focus();
+                    }
+                };
+
+                window.focusNext = (el, index) => {
+                    if (el.value.length === 1) {
+                        const next = contentEl.querySelectorAll('.pin-digit')[index + 1];
+                        if (next) next.focus();
+                    }
+                };
+
+                window.focusPrev = (event, index) => {
+                    if (event.key === "Backspace" && event.target.value === "") {
+                        const prev = contentEl.querySelectorAll('.pin-digit')[index - 1];
+                        if (prev) prev.focus();
+                    }
+                };
             } else {
                 let html = `<p style="font-size: 1.3rem; color: #ff758f; margin-bottom: 2rem; max-width: 90%;">${s.content}</p>`;
                 if (s.type === 'interactive') {
@@ -692,10 +825,6 @@
         }
 
         // Eventos de botones
-        document.getElementById('btn-back-calendar').addEventListener('click', () => {
-            showScreen('calendar');
-            initCalendar();
-        });
 
         function showSurprise(day) {
             const s = surprises[day] || { title: "Día " + day, content: "Pronto habrá una sorpresa aquí...", type: "text" };
