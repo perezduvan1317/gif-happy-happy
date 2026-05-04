@@ -450,11 +450,13 @@
                 bgMusic.pause();
                 bgMusic.currentTime = 0;
             }
-            // Detener todos los videos
+            // Detener todos los videos y limpiar contenido para parar iframes de Vimeo/YT
             document.querySelectorAll('video').forEach(v => {
                 v.pause();
                 v.currentTime = 0;
             });
+            document.getElementById('day-view-content').innerHTML = '';
+            
             showScreen('calendar');
             initCalendar();
         });
@@ -698,7 +700,8 @@
                         </div>
 
                         <div id="pin-section" style="display: none; width: 100%; flex-direction: column; align-items: center;">
-                            <p style="color: #ff4d6d; font-weight: bold; margin-bottom: 1rem;">¡Excelente! Ahora introduce la clave de 4 dígitos para el video principal:</p>
+                            <p style="color: #ff4d6d; font-weight: bold; margin-bottom: 0.8rem; font-size: 0.9rem; line-height: 1.3;">Regla de último momento: para reproducir el video o tienes que grabar una reacción con un celular o estar conmigo.</p>
+                            <p style="color: #ff4d6d; font-weight: bold; margin-bottom: 1.5rem; font-size: 1.1rem;">Ponte cómoda y ve el video con atención ❤️</p>
                             <div class="pin-container">
                                 <div class="pin-inputs">
                                     <input type="text" inputmode="numeric" class="pin-digit" maxlength="1" oninput="focusNext(this, 0)" onkeydown="focusPrev(event, 0)">
