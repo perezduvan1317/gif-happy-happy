@@ -118,10 +118,11 @@
     </div>
 
     <!-- Elemento de Audio Oculto -->
-    <audio id="bg-music" src="assets/music/10 - Married Life (Piano Version).mp3"></audio>
+    <audio id="bg-music" src="assets/music/10 - Married Life (Piano Version).mp3" loop></audio>
 
     <script>
         const DEBUG_MODE = false;
+        const UNLOCKED_DAYS = [1]; // Control manual de días desbloqueados
 
         // Lógica de Día Actual
         const urlParams = new URLSearchParams(window.location.search);
@@ -129,9 +130,8 @@
 
         function getCurrentDay() {
             if (DEBUG_MODE && forcedDay) return forcedDay;
-            const today = new Date();
-            if (today.getMonth() !== 4) return 0; // Solo mayo
-            return today.getDate();
+            // Retornamos el último día desbloqueado manualmente
+            return Math.max(...UNLOCKED_DAYS);
         }
 
         const currentDay = getCurrentDay();
@@ -143,8 +143,8 @@
                 // Si entra con un link de día, saltar directo al desbloqueo
                 handleDayEntry(forcedDay);
             } else if (currentDay > 0) {
-                // Si ya aceptó y es un día posterior al 1, cambiar texto
-                if (acceptedRSVP && currentDay > 1) {
+                // Si ya aceptó y es un día desbloqueado, cambiar texto
+                if (acceptedRSVP && currentDay >= 1) {
                     btnStart.innerText = `Abrir Regalo #${currentDay} 🎁`;
                 } else {
                     btnStart.innerText = `Press Start 🎮`;
@@ -348,8 +348,7 @@
             // Mover el botón NO a posición aleatoria evitando el área del meme, el botón SÍ y el título
             const padding = 20;
             const forbiddenElements = [
-                document.getElementById('meme-display'),
-                document.getElementById('btn-si'),
+                document.getElementById('meme-caption'),
                 document.querySelector('#rsvp-screen h1')
             ];
 
@@ -371,14 +370,17 @@
                 };
 
                 for (const el of forbiddenElements) {
-                    if (!el || el.offsetParent === null) continue; // Si no es visible o no está en el DOM
+                    if (!el || el.offsetParent === null) continue;
                     const rect = el.getBoundingClientRect();
-                    // Margen de seguridad extra para que no roce
-                    const margin = 30;
-                    if (btnRect.left < rect.right + margin &&
-                        btnRect.right > rect.left - margin &&
-                        btnRect.top < rect.bottom + margin &&
-                        btnRect.bottom > rect.top - margin) {
+
+                    // Margen de seguridad más agresivo para evitar el texto
+                    const marginX = window.innerWidth < 500 ? 25 : 45;
+                    const marginY = window.innerWidth < 500 ? 50 : 70;
+
+                    if (btnRect.left < rect.right + marginX &&
+                        btnRect.right > rect.left - marginX &&
+                        btnRect.top < rect.bottom + marginY &&
+                        btnRect.bottom > rect.top - marginY) {
                         hasOverlap = true;
                         break;
                     }
@@ -386,18 +388,18 @@
 
                 if (!hasOverlap) break;
                 attempts++;
-            } while (attempts < 100);
+            } while (attempts < 200);
 
             btnNo.style.position = 'fixed';
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
 
-            // Crecer botón SÍ exponencialmente
+            // Crecer botón SÍ exponencialmente (¡Ahora sin límites para que crezca harto!)
             scaleSi = INITIAL_SCALE * Math.pow(1.5, noCount);
             btnSi.style.transform = `scale(${scaleSi})`;
 
-            // Efecto de brillo si es muy grande
-            if (noCount >= 5) {
+            // Efecto de brillo
+            if (noCount >= 4) {
                 btnSi.classList.add('btn-unlocked');
             }
         }
@@ -589,8 +591,9 @@
                 let giftStatus = '🎁'; // Por defecto cerrado
                 let label = `Regalo ${i}`;
                 const isAlreadyOpened = openedGifts.includes(i);
+                const isUnlocked = UNLOCKED_DAYS.includes(i);
 
-                if (!DEBUG_MODE && i > currentDay) {
+                if (!DEBUG_MODE && !isUnlocked) {
                     card.classList.add('locked');
                     giftStatus = '🔒';
                 } else if (isAlreadyOpened || i < currentDay) {
