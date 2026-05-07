@@ -117,6 +117,129 @@
         </div>
     </div>
 
+    <!-- Pantalla 7: Quiz del Mesiversario -->
+    <div class="container" id="quiz-screen" style="display: none; padding: 1.5rem;">
+        <div id="quiz-header" style="width: 100%; display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <button class="btn-back" id="btn-back-quiz">⬅️</button>
+            <div id="quiz-progress-bar"
+                style="flex: 1; height: 8px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden;">
+                <div id="quiz-progress-fill"
+                    style="height: 100%; background: linear-gradient(90deg, #ff4d6d, #ffb3c1); border-radius: 10px; transition: width 0.5s ease; width: 0%;">
+                </div>
+            </div>
+            <span id="quiz-counter" style="font-family: 'Press Start 2P'; font-size: 0.6rem; color: #ffb3c1;">1/5</span>
+        </div>
+
+        <div id="quiz-hearts" style="font-size: 1.5rem; letter-spacing: 4px; margin-bottom: 1rem; text-align: center;">
+            ❤️❤️❤️</div>
+
+        <div id="quiz-card" style="
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,77,109,0.4);
+            border-radius: 24px;
+            padding: 1.5rem;
+            width: 100%;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(255,77,109,0.15);
+            margin-bottom: 1.2rem;
+        ">
+            <p id="quiz-emoji" style="font-size: 2.5rem; text-align: center; margin-bottom: 0.5rem;">💭</p>
+            <p id="quiz-question"
+                style="font-size: 1.1rem; color: #fff; text-align: center; font-weight: bold; line-height: 1.4; margin: 0;">
+            </p>
+        </div>
+
+        <div id="quiz-options" style="width: 100%; display: flex; flex-direction: column; gap: 0.7rem;"></div>
+
+        <div id="quiz-feedback" style="
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        "></div>
+    </div>
+
+    <!-- Pantalla 8: Resultado Final del Quiz / Juego -->
+    <div class="container" id="quiz-result-screen" style="display: none; padding: 2rem; text-align: center;">
+        <div id="result-emoji" style="font-size: 5rem; margin-bottom: 1rem;">🎁</div>
+        <h1 id="result-title" style="font-size: 1.2rem; margin-bottom: 1rem;">¡Lo lograste!</h1>
+        <p id="result-message" style="color: #ffb3c1; font-size: 1rem; line-height: 1.6; margin-bottom: 2rem;"></p>
+        <div id="result-box-reveal"
+            style="display: none; background: rgba(255,77,109,0.15); border: 2px dashed #ff4d6d; border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem; animation: pulse-glow 2s infinite;">
+            <p style="font-size: 2rem; margin-bottom: 0.5rem;">📦✨</p>
+            <p
+                style="color: #ff4d6d; font-weight: bold; font-family: 'Press Start 2P'; font-size: 0.75rem; line-height: 1.6;">
+                ¡PUEDES ABRIR<br>LA CAJITA! 🎀</p>
+        </div>
+        <button id="btn-quiz-retry" class="btn btn-no"
+            style="display: none; margin-bottom: 1rem; font-size: 0.65rem; padding: 0.8rem 1.5rem;">Intentar de nuevo
+            🔄</button>
+        <button id="btn-quiz-back" class="btn btn-yes" style="font-size: 0.65rem; padding: 0.8rem 1.5rem;">Volver a los
+            regalitos ❤️</button>
+    </div>
+
+    <!-- Pantalla 9: Juego Atrapa los Corazones 💘 -->
+    <div id="heart-game-screen"
+        style="display: none; position: fixed; inset: 0; z-index: 200; overflow: hidden; background: linear-gradient(160deg, #1a001f 0%, #3d0026 50%, #1a001f 100%);">
+
+        <!-- HUD superior -->
+        <div id="hgame-hud"
+            style="position: absolute; top: 0; left: 0; right: 0; z-index: 20; padding: 0.9rem 1.2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent); pointer-events: none;">
+            <!-- Score -->
+            <div style="text-align: left;">
+                <div style="font-family: 'Press Start 2P'; font-size: 0.5rem; color: #ffb3c1; letter-spacing: 1px;">
+                    SCORE</div>
+                <div id="hgame-score"
+                    style="font-family: 'Press Start 2P'; font-size: 1.4rem; color: #ff4d6d; text-shadow: 0 0 10px rgba(255,77,109,0.8);">
+                    0</div>
+            </div>
+            <!-- Progress -->
+            <div style="flex: 1; margin: 0 1rem; text-align: center;">
+                <div
+                    style="font-family: 'Press Start 2P'; font-size: 0.42rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">
+                    META: 20 💘</div>
+                <div
+                    style="height: 8px; background: rgba(255,255,255,0.15); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,179,193,0.3);">
+                    <div id="hgame-progress-fill"
+                        style="height: 100%; background: linear-gradient(90deg, #ff4d6d, #ffd700); border-radius: 10px; width: 0%; transition: width 0.3s ease;">
+                    </div>
+                </div>
+            </div>
+            <!-- Lives -->
+            <div id="hgame-lives"
+                style="font-size: 1.3rem; letter-spacing: 2px; text-shadow: 0 0 6px rgba(255,77,109,0.5);">❤️❤️❤️</div>
+        </div>
+
+        <!-- Botón volver -->
+        <button id="hgame-back-btn"
+            style="position: absolute; top: 0.7rem; left: -9999px; z-index: 30; background: transparent; border: none; color: #ffb3c1; font-family: 'Pixelify Sans'; font-size: 1.1rem; font-weight: bold; cursor: pointer; padding: 4px 10px;">⬅️
+            Salir</button>
+
+        <!-- Área de juego -->
+        <div id="heart-game-area" style="position: absolute; inset: 0; overflow: hidden; touch-action: none;"></div>
+
+        <!-- Overlay de cuenta regresiva / inicio -->
+        <div id="hgame-overlay"
+            style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 25; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+            <p
+                style="font-family: 'Press Start 2P'; font-size: 0.65rem; color: #ffb3c1; margin-bottom: 1rem; text-align: center; line-height: 1.8; text-shadow: none;">
+                ¡Toca los corazones<br>antes de que caigan!</p>
+            <div id="hgame-countdown-num"
+                style="font-family: 'Press Start 2P'; font-size: 5rem; color: #ff4d6d; text-shadow: 0 0 30px rgba(255,77,109,0.9); transition: transform 0.2s;">
+                3</div>
+        </div>
+
+        <!-- Overlay de pausa / missed -->
+        <div id="hgame-miss-flash"
+            style="position: absolute; inset: 0; background: rgba(255,0,0,0.25); z-index: 15; display: none; pointer-events: none;">
+        </div>
+    </div>
+
     <!-- Elemento de Audio Oculto -->
     <audio id="bg-music" src="assets/music/10 - Married Life (Piano Version).mp3" loop></audio>
 
@@ -124,9 +247,14 @@
         const DEBUG_MODE = false;
         const UNLOCKED_DAYS = [1];
 
-        // Desbloqueo automático día 2: Mañana 4 de Mayo
+        // Desbloqueo automático día 2: 4 de Mayo
         if (new Date() >= new Date('2026-05-04T00:00:00')) {
             if (!UNLOCKED_DAYS.includes(2)) UNLOCKED_DAYS.push(2);
+        }
+
+        // Desbloqueo automático día 3: 7 de Mayo (mesiversario)
+        if (new Date() >= new Date('2026-05-07T00:00:00')) {
+            if (!UNLOCKED_DAYS.includes(3)) UNLOCKED_DAYS.push(3);
         }
 
         // Lógica de Día Actual
@@ -168,6 +296,15 @@
             document.getElementById('unlock-text').innerText = `¡REGALITO ${day} DESBLOQUEADO!`;
             document.getElementById('unlock-subtext').innerText = `Prepárate para la sorpresa #${day}...`;
             showScreen('unlock');
+
+            // Efecto de celebración al desbloquear
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ff4d6d', '#ff758f', '#ffb3c1', '#ffffff']
+            });
+
             setTimeout(() => {
                 showDayContent(day);
             }, 2500);
@@ -180,8 +317,20 @@
             instructions: document.getElementById('instruction-screen'),
             unlock: document.getElementById('unlock-screen'),
             calendar: document.getElementById('calendar-screen'),
-            'day-view': document.getElementById('day-view-screen')
+            'day-view': document.getElementById('day-view-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            'quiz-result': document.getElementById('quiz-result-screen')
         };
+
+        // Pantalla del juego (manejo separado por ser fixed/fullscreen)
+        const heartGameScreen = document.getElementById('heart-game-screen');
+        function showHeartGameScreen() {
+            Object.values(screens).forEach(s => s.style.display = 'none');
+            heartGameScreen.style.display = 'block';
+        }
+        function hideHeartGameScreen() {
+            heartGameScreen.style.display = 'none';
+        }
 
         // Botones
         const btnStart = document.getElementById('btn-start');
@@ -571,9 +720,8 @@
                 correctPin: "0504" // Por defecto 0504 (Mayo 4).
             },
             3: {
-                title: "Día 3: Un Reto 🧩",
-                content: "Hoy tu reto es decirme 3 cosas que te gusten de nosotros.",
-                type: "text"
+                title: "Atrapa los Corazones 💘",
+                type: "heart-catcher"
             },
             4: {
                 title: "Día 4: Memoria 📸",
@@ -818,12 +966,38 @@
                         if (prev) prev.focus();
                     }
                 };
+            } else if (s.type === 'heart-catcher') {
+                // Mostrar pantalla de intro antes del juego
+                contentEl.innerHTML = `
+                    <div style="text-align: center; padding: 1rem;">
+                        <p style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: emojiWobble 1.5s infinite;">💘</p>
+                        <h2 style="font-family: 'Press Start 2P'; font-size: 0.8rem; color: #ff4d6d; margin-bottom: 1.2rem; line-height: 1.7;">¡Atrapa los<br>corazones!</h2>
+                        <div style="background: rgba(255,255,255,0.08); border: 2px dashed rgba(255,179,193,0.4); border-radius: 20px; padding: 1.2rem; margin-bottom: 1.5rem; text-align: left;">
+                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">❤️ Toca los corazones antes de que caigan</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">💔 Tienes 3 vidas — ¡no los dejes escapar!</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 0;">🎁 Atrapa 20 y desbloquea tu cajita</p>
+                        </div>
+                        <button id="btn-start-heartgame" class="btn btn-yes" style="padding: 1rem 2rem; font-size: 0.7rem; width: 100%;">¡Jugar! 🎮</button>
+                    </div>
+                `;
+                document.getElementById('btn-start-heartgame').onclick = () => {
+                    playSound('click');
+                    initHeartGame();
+                };
             } else {
-                let html = `<p style="font-size: 1.3rem; color: #ff758f; margin-bottom: 2rem; max-width: 90%;">${s.content}</p>`;
-                if (s.type === 'interactive') {
-                    html += `<button id="day-action-btn" class="btn btn-yes" style="padding: 1rem 2rem;">${s.action}</button>`;
-                } else if (s.type === 'image') {
-                    html += `<div class="photo-container" style="width: 250px; height: 250px; transform: rotate(0deg);"><img src="${s.src}"></div>`;
+                let html = '';
+                if (s.type === 'image') {
+                    html = `
+                        <div class="photo-container" style="width: 280px; height: 280px; transform: rotate(2deg); margin-bottom: 2rem;">
+                            <img src="${s.src}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                        </div>
+                        <p style="font-size: 1.4rem; color: #ff758f; text-align: center; padding: 0 1rem; line-height: 1.4; font-weight: bold; text-shadow: 1px 1px 0 #fff;">${s.content}</p>
+                    `;
+                } else {
+                    html = `<p style="font-size: 1.3rem; color: #ff758f; margin-bottom: 2rem; max-width: 90%;">${s.content}</p>`;
+                    if (s.type === 'interactive') {
+                        html += `<button id="day-action-btn" class="btn btn-yes" style="padding: 1rem 2rem;">${s.action}</button>`;
+                    }
                 }
                 contentEl.innerHTML = html;
 
@@ -834,6 +1008,412 @@
             }
             showScreen('day-view');
         }
+
+        // =====================================================
+        // QUIZ DEL MESIVERSARIO
+        // =====================================================
+        const quizQuestions = [
+            {
+                emoji: '🎵',
+                question: '¿Cuál es la canción que más me escuchas poner?',
+                options: ['Benson Boone - Beautiful Things', 'Morat - Cómo Te Atreves', 'Coldplay - Yellow', 'Ed Sheeran - Perfect'],
+                correct: 0,
+                wrongMsg: '¡Casi! Es Beautiful Things de Benson Boone, la que suena cada vez que estoy de buen humor 😅'
+            },
+            {
+                emoji: '🍕',
+                question: '¿Cuál es mi comida favorita?',
+                options: ['Hamburguesa', 'Pizza', 'Sushi', 'Tacos'],
+                correct: 1,
+                wrongMsg: '¡Nooo! Es pizza. Siempre pizza. Pizza para todo 🍕'
+            },
+            {
+                emoji: '😴',
+                question: '¿Cuál es mi mayor defecto según yo mismo?',
+                options: ['Soy muy terco', 'Me demoro mucho despertando', 'Soy despistado', 'Como muy rápido'],
+                correct: 1,
+                wrongMsg: 'Me cuesta MUCHO levantarme en las mañanas... y lo sabes jaja 😅'
+            },
+            {
+                emoji: '💭',
+                question: '¿Qué es lo que más me gusta de nosotros?',
+                options: ['Que podemos hablar de todo', 'Que siempre nos reímos', 'Que nos apoyamos', 'Todas las anteriores'],
+                correct: 3,
+                wrongMsg: '¡Son todas! No podía escoger solo una porque todas son verdad contigo 💕'
+            },
+            {
+                emoji: '🌙',
+                question: '¿En qué momento del día pienso más en ti?',
+                options: ['En la mañana', 'En el almuerzo', 'En la noche antes de dormir', 'Todo el tiempo'],
+                correct: 3,
+                wrongMsg: '¡Todo el tiempo! No hay un momento específico porque siempre apareces en mi cabeza ❤️'
+            }
+        ];
+
+        let quizState = {
+            current: 0,
+            lives: 3,
+            passed: false
+        };
+
+        const quizScreenEl = document.getElementById('quiz-screen');
+        const quizResultScreenEl = document.getElementById('quiz-result-screen');
+
+        document.getElementById('btn-back-quiz').addEventListener('click', () => {
+            showScreen('calendar');
+            initCalendar();
+        });
+
+        document.getElementById('btn-quiz-back').addEventListener('click', () => {
+            showScreen('calendar');
+            initCalendar();
+        });
+
+        document.getElementById('btn-quiz-retry').addEventListener('click', () => {
+            startAnniversaryQuiz();
+        });
+
+        function startAnniversaryQuiz() {
+            quizState = { current: 0, lives: 3, passed: false };
+            showScreen('quiz');
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const q = quizQuestions[quizState.current];
+            const total = quizQuestions.length;
+
+            // Progress
+            document.getElementById('quiz-counter').innerText = `${quizState.current + 1}/${total}`;
+            document.getElementById('quiz-progress-fill').style.width = `${((quizState.current) / total) * 100}%`;
+
+            // Hearts
+            const hearts = '❤️'.repeat(quizState.lives) + '🖤'.repeat(3 - quizState.lives);
+            document.getElementById('quiz-hearts').innerText = hearts;
+
+            // Question
+            document.getElementById('quiz-emoji').innerText = q.emoji;
+            document.getElementById('quiz-question').innerText = q.question;
+
+            // Options
+            const optionsEl = document.getElementById('quiz-options');
+            optionsEl.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option-btn';
+                btn.innerHTML = `<span class="quiz-option-letter">${String.fromCharCode(65 + i)}</span> ${opt}`;
+                btn.onclick = () => handleQuizAnswer(i);
+                optionsEl.appendChild(btn);
+            });
+
+            // Hide feedback
+            document.getElementById('quiz-feedback').style.display = 'none';
+        }
+
+        function handleQuizAnswer(selectedIndex) {
+            const q = quizQuestions[quizState.current];
+            const feedbackEl = document.getElementById('quiz-feedback');
+            const optionBtns = document.querySelectorAll('.quiz-option-btn');
+
+            // Disable all buttons
+            optionBtns.forEach(b => b.disabled = true);
+
+            // Mark correct
+            optionBtns[q.correct].classList.add('quiz-correct');
+
+            if (selectedIndex === q.correct) {
+                playSound('yes');
+                optionBtns[selectedIndex].classList.add('quiz-correct');
+                feedbackEl.style.display = 'block';
+                feedbackEl.style.background = 'rgba(100, 200, 100, 0.2)';
+                feedbackEl.style.border = '1px solid rgba(100, 200, 100, 0.4)';
+                feedbackEl.style.color = '#90ee90';
+                const correctMessages = ['¡Exacto! 🎉', '¡Así es! ✨', '¡Muy bien! 💕', '¡Correcto! 🌟', '¡Eso es! 🎊'];
+                feedbackEl.innerText = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+
+                setTimeout(() => {
+                    quizState.current++;
+                    if (quizState.current >= quizQuestions.length) {
+                        showQuizResult(true);
+                    } else {
+                        renderQuizQuestion();
+                    }
+                }, 1200);
+            } else {
+                playSound('no');
+                optionBtns[selectedIndex].classList.add('quiz-wrong');
+                quizState.lives--;
+
+                feedbackEl.style.display = 'block';
+                feedbackEl.style.background = 'rgba(255, 77, 109, 0.15)';
+                feedbackEl.style.border = '1px solid rgba(255, 77, 109, 0.4)';
+                feedbackEl.style.color = '#ff9fb3';
+                feedbackEl.innerText = q.wrongMsg;
+
+                if (quizState.lives <= 0) {
+                    setTimeout(() => showQuizResult(false), 2000);
+                } else {
+                    setTimeout(() => {
+                        renderQuizQuestion();
+                    }, 2500);
+                }
+            }
+        }
+
+        function showQuizResult(passed) {
+            confetti({
+                particleCount: passed ? 200 : 30,
+                spread: passed ? 90 : 40,
+                origin: { y: 0.5 },
+                colors: passed ? ['#ff4d6d', '#ffb3c1', '#fff', '#ffd700'] : ['#666', '#888']
+            });
+
+            const resultEmoji = document.getElementById('result-emoji');
+            const resultTitle = document.getElementById('result-title');
+            const resultMsg = document.getElementById('result-message');
+            const boxReveal = document.getElementById('result-box-reveal');
+            const retryBtn = document.getElementById('btn-quiz-retry');
+
+            if (passed) {
+                resultEmoji.innerText = '🎉';
+                resultTitle.innerText = '¡Lo lograste, mi amor!';
+                resultMsg.innerText = 'Sabía que me conocías bien 💕 Como premio a tu esfuerzo... ahora sí puedes ir a abrir esa cajita que está esperándote. ¡Espero que te guste mucho!';
+                boxReveal.style.display = 'block';
+                retryBtn.style.display = 'none';
+                playSound('yes');
+            } else {
+                resultEmoji.innerText = '🙈';
+                resultTitle.innerText = 'Casi, casi...';
+                resultMsg.innerText = 'Se te acabaron los corazones 😅 Pero no te preocupes, puedes volver a intentarlo. ¡Tú puedes!';
+                boxReveal.style.display = 'none';
+                retryBtn.style.display = 'block';
+            }
+
+            showScreen('quiz-result');
+        }
+
+        // =====================================================
+        // JUEGO: ATRAPA LOS CORAZONES 💘
+        // =====================================================
+        let hgState = {};
+
+        function initHeartGame() {
+            hgState = {
+                running: false,
+                score: 0,
+                lives: 3,
+                target: 20,
+                spawnTimer: null,
+                animFrame: null,
+                spawnDelay: 900,
+                hearts: []
+            };
+
+            showHeartGameScreen();
+            updateHGHUD();
+
+            const overlay = document.getElementById('hgame-overlay');
+            const numEl = document.getElementById('hgame-countdown-num');
+            overlay.style.display = 'flex';
+            numEl.style.color = '#ff4d6d';
+
+            // Limpia corazones anteriores
+            document.getElementById('heart-game-area').innerHTML = '';
+
+            // Cuenta regresiva 3…2…1…¡YA!
+            let count = 3;
+            numEl.innerText = count;
+            const tick = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    numEl.innerText = count;
+                    numEl.style.transform = 'scale(1.3)';
+                    setTimeout(() => numEl.style.transform = 'scale(1)', 200);
+                } else if (count === 0) {
+                    numEl.innerText = '¡YA!';
+                    numEl.style.color = '#ffd700';
+                } else {
+                    clearInterval(tick);
+                    overlay.style.display = 'none';
+                    startHGSpawning();
+                }
+            }, 900);
+        }
+
+        function updateHGHUD() {
+            document.getElementById('hgame-score').innerText = hgState.score;
+            const pct = Math.min((hgState.score / hgState.target) * 100, 100);
+            document.getElementById('hgame-progress-fill').style.width = pct + '%';
+            const l = hgState.lives;
+            document.getElementById('hgame-lives').innerText = '❤️'.repeat(Math.max(l, 0)) + '🖤'.repeat(Math.max(3 - l, 0));
+        }
+
+        function startHGSpawning() {
+            hgState.running = true;
+            const area = document.getElementById('heart-game-area');
+            const areaW = area.offsetWidth;
+            const areaH = area.offsetHeight;
+
+            const scheduleSpawn = () => {
+                if (!hgState.running) return;
+                spawnHeart(area, areaW, areaH);
+                // Aumentar dificultad progresivamente
+                hgState.spawnDelay = Math.max(350, 900 - hgState.score * 22);
+                hgState.spawnTimer = setTimeout(scheduleSpawn, hgState.spawnDelay);
+            };
+            scheduleSpawn();
+
+            // Loop de animación
+            const loop = () => {
+                if (!hgState.running) return;
+                area.querySelectorAll('.fheart').forEach(h => {
+                    const y = parseFloat(h.dataset.y);
+                    const spd = parseFloat(h.dataset.spd);
+                    const ny = y + spd;
+                    h.dataset.y = ny;
+                    h.style.top = ny + 'px';
+
+                    if (ny > areaH + 60) {
+                        h.remove();
+                        hgState.lives--;
+                        updateHGHUD();
+                        flashMiss();
+                        playSound('no');
+                        if (hgState.lives <= 0) {
+                            endHeartGame(false);
+                        }
+                    }
+                });
+                hgState.animFrame = requestAnimationFrame(loop);
+            };
+            hgState.animFrame = requestAnimationFrame(loop);
+        }
+
+        function spawnHeart(area, areaW, areaH) {
+            const emojis = ['💘', '💕', '💗', '💓', '💞', '❤️', '🩷', '💖'];
+            const e = emojis[Math.floor(Math.random() * emojis.length)];
+            const h = document.createElement('div');
+            h.className = 'fheart';
+
+            const size = 34 + Math.random() * 26;
+            const x = 16 + Math.random() * (areaW - size - 32);
+            // Velocidad crece con el puntaje
+            const spd = 1.8 + Math.random() * 1.5 + (hgState.score / hgState.target) * 2.5;
+            const startY = -size - 10;
+
+            h.dataset.y = startY;
+            h.dataset.spd = spd;
+            h.innerText = e;
+            h.style.cssText = [
+                'position:absolute',
+                `top:${startY}px`,
+                `left:${x}px`,
+                `font-size:${size}px`,
+                'cursor:pointer',
+                'user-select:none',
+                'touch-action:none',
+                'filter:drop-shadow(0 0 8px rgba(255,77,109,0.7))',
+                'transition:opacity 0.15s,transform 0.15s',
+                'z-index:10',
+                `animation:hSwing ${1.2 + Math.random() * 0.8}s ease-in-out infinite alternate`
+            ].join(';');
+
+            const catchHeart = (ev) => {
+                if (!hgState.running) return;
+                ev.stopPropagation();
+                ev.preventDefault();
+
+                h.style.transform = 'scale(2.2)';
+                h.style.opacity = '0';
+                setTimeout(() => h.remove(), 180);
+
+                // Partícula +1
+                const p = document.createElement('div');
+                p.innerText = '+1 💘';
+                p.style.cssText = [
+                    'position:absolute',
+                    `top:${parseFloat(h.dataset.y) - 24}px`,
+                    `left:${x}px`,
+                    "font-family:'Press Start 2P'",
+                    'font-size:0.65rem',
+                    'color:#ffd700',
+                    'pointer-events:none',
+                    'z-index:30',
+                    'animation:hFloatUp 0.8s ease-out forwards',
+                    'text-shadow:0 0 6px rgba(255,215,0,0.8)'
+                ].join(';');
+                area.appendChild(p);
+                setTimeout(() => p.remove(), 820);
+
+                playSound('yes');
+                hgState.score++;
+                updateHGHUD();
+
+                if (hgState.score >= hgState.target) {
+                    endHeartGame(true);
+                }
+            };
+
+            h.addEventListener('click', catchHeart);
+            h.addEventListener('touchstart', catchHeart, { passive: false });
+            area.appendChild(h);
+        }
+
+        function flashMiss() {
+            const f = document.getElementById('hgame-miss-flash');
+            f.style.display = 'block';
+            setTimeout(() => f.style.display = 'none', 220);
+        }
+
+        function endHeartGame(won) {
+            hgState.running = false;
+            clearTimeout(hgState.spawnTimer);
+            cancelAnimationFrame(hgState.animFrame);
+            document.querySelectorAll('.fheart').forEach(h => h.remove());
+
+            hideHeartGameScreen();
+
+            const resultEmoji = document.getElementById('result-emoji');
+            const resultTitle = document.getElementById('result-title');
+            const resultMsg = document.getElementById('result-message');
+            const boxReveal = document.getElementById('result-box-reveal');
+            const retryBtn = document.getElementById('btn-quiz-retry');
+            const backBtn = document.getElementById('btn-quiz-back');
+
+            if (won) {
+                confetti({ particleCount: 220, spread: 95, origin: { y: 0.5 }, colors: ['#ff4d6d', '#ffb3c1', '#fff', '#ffd700', '#ff69b4'] });
+                playSound('yes');
+                resultEmoji.innerText = '🎉';
+                resultTitle.innerText = '¡Lo lograste, mi amor!';
+                resultMsg.innerText = `¡Atrapaste ${hgState.score} corazones! 💘 Ahora sí puedes ir a buscar esa cajita especial que está esperándote...`;
+                boxReveal.style.display = 'block';
+                retryBtn.style.display = 'none';
+                backBtn.style.display = 'block';
+            } else {
+                resultEmoji.innerText = '💔';
+                resultTitle.innerText = '¡Casi!';
+                resultMsg.innerText = `Se te escaparon los corazoncitos 😢 Atrapaste ${hgState.score} de ${hgState.target}. ¡Tú puedes, inténtalo de nuevo!`;
+                boxReveal.style.display = 'none';
+                retryBtn.style.display = 'block';
+                retryBtn.onclick = () => {
+                    showScreen('day-view');
+                    initHeartGame();
+                };
+                backBtn.style.display = 'block';
+            }
+            showScreen('quiz-result');
+        }
+
+        // Botón volver dentro del juego
+        document.getElementById('hgame-back-btn').addEventListener('click', () => {
+            hgState.running = false;
+            clearTimeout(hgState.spawnTimer);
+            cancelAnimationFrame(hgState.animFrame);
+            document.querySelectorAll('.fheart').forEach(h => h.remove());
+            hideHeartGameScreen();
+            showScreen('calendar');
+            initCalendar();
+        });
 
         // Eventos de botones
 
