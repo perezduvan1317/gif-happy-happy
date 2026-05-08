@@ -228,7 +228,7 @@
             style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 25; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
             <p
                 style="font-family: 'Press Start 2P'; font-size: 0.65rem; color: #ffb3c1; margin-bottom: 1rem; text-align: center; line-height: 1.8; text-shadow: none;">
-                ¡Toca los corazones<br>antes de que caigan!</p>
+                ¡Atrapa los animalitos<br>antes de que caigan!</p>
             <div id="hgame-countdown-num"
                 style="font-family: 'Press Start 2P'; font-size: 5rem; color: #ff4d6d; text-shadow: 0 0 30px rgba(255,77,109,0.9); transition: transform 0.2s;">
                 3</div>
@@ -970,12 +970,13 @@
                 // Mostrar pantalla de intro antes del juego
                 contentEl.innerHTML = `
                     <div style="text-align: center; padding: 1rem;">
-                        <p style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: emojiWobble 1.5s infinite;">💘</p>
-                        <h2 style="font-family: 'Press Start 2P'; font-size: 0.8rem; color: #ff4d6d; margin-bottom: 1.2rem; line-height: 1.7;">¡Atrapa los<br>corazones!</h2>
+                        <p style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: emojiWobble 1.5s infinite;">🐷🦫🐢</p>
+                        <h2 style="font-family: 'Press Start 2P'; font-size: 0.8rem; color: #ff4d6d; margin-bottom: 1.2rem; line-height: 1.7;">¡3 Niveles!<br>¿Puedes ganar?</h2>
                         <div style="background: rgba(255,255,255,0.08); border: 2px dashed rgba(255,179,193,0.4); border-radius: 20px; padding: 1.2rem; margin-bottom: 1.5rem; text-align: left;">
-                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">❤️ Toca los corazones antes de que caigan</p>
-                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">💔 Tienes 3 vidas — ¡no los dejes escapar!</p>
-                            <p style="font-size: 0.9rem; margin-bottom: 0;">🎁 Atrapa 20 y desbloquea tu cajita</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">🐷 N1: 10 animalitos · trampas suaves</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">🦫 N2: 15 animalitos · más rápido y trampas</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">🐢 N3: 20 animalitos · caos total 💀</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 0;">💔💣 ¡Las trampas te quitan una vida!</p>
                         </div>
                         <button id="btn-start-heartgame" class="btn btn-yes" style="padding: 1rem 2rem; font-size: 0.7rem; width: 100%;">¡Jugar! 🎮</button>
                     </div>
@@ -1193,45 +1194,147 @@
         }
 
         // =====================================================
-        // JUEGO: ATRAPA LOS CORAZONES 💘
+        // JUEGO: ATRAPA LOS ANIMALITOS 🐷🦫🐢 — 3 NIVELES
         // =====================================================
-        let hgState = {};
+
+        // Configuración de los 3 niveles
+        const HG_LEVELS = [
+            {
+                level: 1,
+                label: 'NIVEL 1',
+                emoji: '🐷',
+                target: 10,
+                spawnDelay: 850,
+                minDelay: 550,
+                baseSpeed: 1.6,
+                speedRamp: 1.8,
+                trapChance: 0.12,
+                color: '#ff4d6d',
+                bg: 'linear-gradient(160deg, #1a001f 0%, #3d0026 50%, #1a001f 100%)'
+            },
+            {
+                level: 2,
+                label: 'NIVEL 2',
+                emoji: '🦫',
+                target: 15,
+                spawnDelay: 620,
+                minDelay: 380,
+                baseSpeed: 2.4,
+                speedRamp: 2.2,
+                trapChance: 0.28,
+                color: '#ff8c00',
+                bg: 'linear-gradient(160deg, #1a0a00 0%, #3d1a00 50%, #1a0a00 100%)'
+            },
+            {
+                level: 3,
+                label: 'NIVEL 3',
+                emoji: '🐢',
+                target: 20,
+                spawnDelay: 420,
+                minDelay: 230,
+                baseSpeed: 3.2,
+                speedRamp: 3.0,
+                trapChance: 0.40,
+                color: '#ff0055',
+                bg: 'linear-gradient(160deg, #0d0030 0%, #2a0050 50%, #0d0030 100%)'
+            }
+        ];
+
 
         function initHeartGame() {
             hgState = {
                 running: false,
-                score: 0,
-                lives: 3,
-                target: 20,
+                levelIdx: 0,         // índice en HG_LEVELS
+                levelScore: 0,       // puntos del nivel actual
+                lives: 3,            // vidas que se conservan entre niveles
                 spawnTimer: null,
-                animFrame: null,
-                spawnDelay: 900,
-                hearts: []
+                animFrame: null
             };
 
             showHeartGameScreen();
+            _startLevelCountdown();
+        }
+
+        function _currentLvl() {
+            return HG_LEVELS[hgState.levelIdx];
+        }
+
+        function updateHGHUD() {
+            const lvl = _currentLvl();
+            // Progreso dentro del nivel actual
+            const pct = Math.min((hgState.levelScore / lvl.target) * 100, 100);
+            document.getElementById('hgame-progress-fill').style.width = pct + '%';
+            document.getElementById('hgame-progress-fill').style.background =
+                `linear-gradient(90deg, ${lvl.color}, #ffd700)`;
+            // Score = puntos del nivel actual / meta
+            document.getElementById('hgame-score').innerText = `${hgState.levelScore}/${lvl.target}`;
+            // Nivel label encima de la barra
+            const metaEl = document.querySelector('#hgame-hud [style*="META"]');
+            if (metaEl) metaEl.innerText = `${lvl.label} ${lvl.emoji}`;
+            // Vidas
+            const l = hgState.lives;
+            document.getElementById('hgame-lives').innerText =
+                '❤️'.repeat(Math.max(l, 0)) + '🖤'.repeat(Math.max(3 - l, 0));
+            // Fondo del juego cambia por nivel
+            document.getElementById('heart-game-screen').style.background = lvl.bg;
+        }
+
+        function _startLevelCountdown(isAdvance = false) {
+            hgState.levelScore = 0;
+            const lvl = _currentLvl();
             updateHGHUD();
 
             const overlay = document.getElementById('hgame-overlay');
             const numEl = document.getElementById('hgame-countdown-num');
+            const msgEl = overlay.querySelector('p');
             overlay.style.display = 'flex';
-            numEl.style.color = '#ff4d6d';
 
-            // Limpia corazones anteriores
+            if (isAdvance) {
+                // Pantalla dramática de transición de nivel
+                msgEl.innerText = `${lvl.label} ${lvl.emoji}`;
+                msgEl.style.fontSize = '1rem';
+                msgEl.style.color = lvl.color;
+                numEl.innerText = '¡VAMOS!';
+                numEl.style.color = lvl.color;
+                numEl.style.fontSize = '2.8rem';
+                numEl.style.textShadow = `0 0 30px ${lvl.color}`;
+
+                // Confetti del nivel
+                confetti({
+                    particleCount: 80, spread: 70, origin: { y: 0.4 },
+                    colors: [lvl.color, '#fff', '#ffd700']
+                });
+
+                setTimeout(() => {
+                    msgEl.innerText = '¡Atrapa los animalitos\nantes de que caigan!';
+                    msgEl.style.fontSize = '';
+                    msgEl.style.color = '#ffb3c1';
+                    numEl.style.fontSize = '5rem';
+                    _runCountdown(overlay, numEl);
+                }, 2000);
+            } else {
+                msgEl.innerText = '¡Atrapa los animalitos\nantes de que caigan!';
+                msgEl.style.color = '#ffb3c1';
+                numEl.style.fontSize = '5rem';
+                numEl.style.color = '#ff4d6d';
+                numEl.style.textShadow = '0 0 30px rgba(255,77,109,0.9)';
+                _runCountdown(overlay, numEl);
+            }
+
+            // Limpia sprites anteriores
             document.getElementById('heart-game-area').innerHTML = '';
+        }
 
-            // Cuenta regresiva 3…2…1…¡YA!
+        function _runCountdown(overlay, numEl) {
             let count = 3;
             numEl.innerText = count;
+            numEl.style.color = '#ff4d6d';
             const tick = setInterval(() => {
                 count--;
                 if (count > 0) {
                     numEl.innerText = count;
                     numEl.style.transform = 'scale(1.3)';
                     setTimeout(() => numEl.style.transform = 'scale(1)', 200);
-                } else if (count === 0) {
-                    numEl.innerText = '¡YA!';
-                    numEl.style.color = '#ffd700';
                 } else {
                     clearInterval(tick);
                     overlay.style.display = 'none';
@@ -1240,49 +1343,47 @@
             }, 900);
         }
 
-        function updateHGHUD() {
-            document.getElementById('hgame-score').innerText = hgState.score;
-            const pct = Math.min((hgState.score / hgState.target) * 100, 100);
-            document.getElementById('hgame-progress-fill').style.width = pct + '%';
-            const l = hgState.lives;
-            document.getElementById('hgame-lives').innerText = '❤️'.repeat(Math.max(l, 0)) + '🖤'.repeat(Math.max(3 - l, 0));
-        }
-
         function startHGSpawning() {
             hgState.running = true;
+            const lvl = _currentLvl();
             const area = document.getElementById('heart-game-area');
             const areaW = area.offsetWidth;
             const areaH = area.offsetHeight;
 
+            // Spawn progresivo: el delay baja según puntaje del nivel
             const scheduleSpawn = () => {
                 if (!hgState.running) return;
                 spawnHeart(area, areaW, areaH);
-                // Aumentar dificultad progresivamente
-                hgState.spawnDelay = Math.max(350, 900 - hgState.score * 22);
-                hgState.spawnTimer = setTimeout(scheduleSpawn, hgState.spawnDelay);
+                const progress = hgState.levelScore / lvl.target;
+                const delay = Math.max(lvl.minDelay,
+                    lvl.spawnDelay - progress * (lvl.spawnDelay - lvl.minDelay) * 0.8);
+                hgState.spawnTimer = setTimeout(scheduleSpawn, delay);
             };
             scheduleSpawn();
 
-            // Loop de animación
+            // Loop de animación — animalitos que caen sin ser tocados cuestan una vida
             const loop = () => {
                 if (!hgState.running) return;
                 area.querySelectorAll('.fheart').forEach(h => {
-                    const y = parseFloat(h.dataset.y);
-                    const spd = parseFloat(h.dataset.spd);
-                    const ny = y + spd;
+                    if (h.dataset.trap === '1') return;  // trampas que caen NO cuestan vida
+                    const ny = parseFloat(h.dataset.y) + parseFloat(h.dataset.spd);
                     h.dataset.y = ny;
                     h.style.top = ny + 'px';
-
                     if (ny > areaH + 60) {
                         h.remove();
                         hgState.lives--;
                         updateHGHUD();
                         flashMiss();
                         playSound('no');
-                        if (hgState.lives <= 0) {
-                            endHeartGame(false);
-                        }
+                        if (hgState.lives <= 0) endHeartGame(false);
                     }
+                });
+                // También mover trampas (caen pero no penalizan si escapan)
+                area.querySelectorAll('.fheart[data-trap="1"]').forEach(h => {
+                    const ny = parseFloat(h.dataset.y) + parseFloat(h.dataset.spd);
+                    h.dataset.y = ny;
+                    h.style.top = ny + 'px';
+                    if (ny > areaH + 60) h.remove();
                 });
                 hgState.animFrame = requestAnimationFrame(loop);
             };
@@ -1290,20 +1391,36 @@
         }
 
         function spawnHeart(area, areaW, areaH) {
-            const emojis = ['💘', '💕', '💗', '💓', '💞', '❤️', '🩷', '💖'];
-            const e = emojis[Math.floor(Math.random() * emojis.length)];
+            const lvl = _currentLvl();
+            const progress = hgState.levelScore / lvl.target;
+
+            // Trampas: probabilidad fija del nivel + pequeño ramp
+            const isTrap = Math.random() < lvl.trapChance + progress * 0.05;
+
+            const goodEmojis = ['🐷', '🐽', '🦫', '🐢', '🐷', '🦫', '🐢', '🐽'];
+            const trapEmojis = ['💔', '💣'];
+            const e = isTrap
+                ? trapEmojis[Math.floor(Math.random() * trapEmojis.length)]
+                : goodEmojis[Math.floor(Math.random() * goodEmojis.length)];
+
             const h = document.createElement('div');
             h.className = 'fheart';
+            if (isTrap) h.dataset.trap = '1';
 
-            const size = 34 + Math.random() * 26;
+            const size = 30 + Math.random() * 28;
             const x = 16 + Math.random() * (areaW - size - 32);
-            // Velocidad crece con el puntaje
-            const spd = 1.8 + Math.random() * 1.5 + (hgState.score / hgState.target) * 2.5;
+            // Velocidad: base del nivel + ramp proporcional al progreso
+            const spd = lvl.baseSpeed + Math.random() * 1.2 + progress * lvl.speedRamp;
             const startY = -size - 10;
 
             h.dataset.y = startY;
             h.dataset.spd = spd;
             h.innerText = e;
+
+            const glow = isTrap
+                ? 'drop-shadow(0 0 12px rgba(255,0,0,1)) drop-shadow(0 0 4px rgba(255,0,0,0.6))'
+                : `drop-shadow(0 0 8px ${lvl.color}aa)`;
+
             h.style.cssText = [
                 'position:absolute',
                 `top:${startY}px`,
@@ -1312,13 +1429,13 @@
                 'cursor:pointer',
                 'user-select:none',
                 'touch-action:none',
-                'filter:drop-shadow(0 0 8px rgba(255,77,109,0.7))',
+                `filter:${glow}`,
                 'transition:opacity 0.15s,transform 0.15s',
                 'z-index:10',
-                `animation:hSwing ${1.2 + Math.random() * 0.8}s ease-in-out infinite alternate`
+                `animation:hSwing ${1.0 + Math.random() * 0.9}s ease-in-out infinite alternate`
             ].join(';');
 
-            const catchHeart = (ev) => {
+            const onTap = (ev) => {
                 if (!hgState.running) return;
                 ev.stopPropagation();
                 ev.preventDefault();
@@ -1327,36 +1444,71 @@
                 h.style.opacity = '0';
                 setTimeout(() => h.remove(), 180);
 
-                // Partícula +1
                 const p = document.createElement('div');
-                p.innerText = '+1 💘';
-                p.style.cssText = [
-                    'position:absolute',
-                    `top:${parseFloat(h.dataset.y) - 24}px`,
-                    `left:${x}px`,
-                    "font-family:'Press Start 2P'",
-                    'font-size:0.65rem',
-                    'color:#ffd700',
-                    'pointer-events:none',
-                    'z-index:30',
-                    'animation:hFloatUp 0.8s ease-out forwards',
-                    'text-shadow:0 0 6px rgba(255,215,0,0.8)'
-                ].join(';');
-                area.appendChild(p);
-                setTimeout(() => p.remove(), 820);
+                if (isTrap) {
+                    p.innerText = '-1 💔';
+                    p.style.cssText = [
+                        'position:absolute',
+                        `top:${parseFloat(h.dataset.y) - 24}px`,
+                        `left:${x}px`,
+                        "font-family:'Press Start 2P'",
+                        'font-size:0.65rem', 'color:#ff4d6d',
+                        'pointer-events:none', 'z-index:30',
+                        'animation:hFloatUp 0.8s ease-out forwards',
+                        'text-shadow:0 0 8px rgba(255,0,0,0.9)'
+                    ].join(';');
+                    area.appendChild(p);
+                    setTimeout(() => p.remove(), 820);
 
-                playSound('yes');
-                hgState.score++;
-                updateHGHUD();
+                    playSound('no');
+                    hgState.lives--;
+                    updateHGHUD();
+                    flashMiss();
+                    if (hgState.lives <= 0) endHeartGame(false);
+                } else {
+                    p.innerText = '+1 🐾';
+                    p.style.cssText = [
+                        'position:absolute',
+                        `top:${parseFloat(h.dataset.y) - 24}px`,
+                        `left:${x}px`,
+                        "font-family:'Press Start 2P'",
+                        'font-size:0.65rem', 'color:#ffd700',
+                        'pointer-events:none', 'z-index:30',
+                        'animation:hFloatUp 0.8s ease-out forwards',
+                        'text-shadow:0 0 6px rgba(255,215,0,0.8)'
+                    ].join(';');
+                    area.appendChild(p);
+                    setTimeout(() => p.remove(), 820);
 
-                if (hgState.score >= hgState.target) {
-                    endHeartGame(true);
+                    playSound('yes');
+                    hgState.levelScore++;
+                    updateHGHUD();
+
+                    if (hgState.levelScore >= lvl.target) {
+                        advanceLevel();
+                    }
                 }
             };
 
-            h.addEventListener('click', catchHeart);
-            h.addEventListener('touchstart', catchHeart, { passive: false });
+            h.addEventListener('click', onTap);
+            h.addEventListener('touchstart', onTap, { passive: false });
             area.appendChild(h);
+        }
+
+        function advanceLevel() {
+            // Detener spawning y animación antes de la transición
+            hgState.running = false;
+            clearTimeout(hgState.spawnTimer);
+            cancelAnimationFrame(hgState.animFrame);
+            document.querySelectorAll('.fheart').forEach(h => h.remove());
+
+            if (hgState.levelIdx >= HG_LEVELS.length - 1) {
+                // ¡Completó el último nivel → GANÓ!
+                endHeartGame(true);
+            } else {
+                hgState.levelIdx++;
+                _startLevelCountdown(true);   // transición dramática
+            }
         }
 
         function flashMiss() {
@@ -1381,24 +1533,25 @@
             const backBtn = document.getElementById('btn-quiz-back');
 
             if (won) {
-                confetti({ particleCount: 220, spread: 95, origin: { y: 0.5 }, colors: ['#ff4d6d', '#ffb3c1', '#fff', '#ffd700', '#ff69b4'] });
+                confetti({
+                    particleCount: 250, spread: 100, origin: { y: 0.5 },
+                    colors: ['#ff4d6d', '#ffb3c1', '#fff', '#ffd700', '#ff8c00', '#ff0055']
+                });
                 playSound('yes');
                 resultEmoji.innerText = '🎉';
-                resultTitle.innerText = '¡Lo lograste, mi amor!';
-                resultMsg.innerText = `¡Atrapaste ${hgState.score} corazones! 💘 Ahora sí puedes ir a buscar esa cajita especial que está esperándote...`;
+                resultTitle.innerText = '¡LO LOGRASTE!';
+                resultMsg.innerText = `¡Superaste los 3 niveles! 🐷🦫🐢 Eso merece un premio... ve a buscar esa cajita especial que está esperándote 🎁`;
                 boxReveal.style.display = 'block';
                 retryBtn.style.display = 'none';
                 backBtn.style.display = 'block';
             } else {
+                const lvlName = HG_LEVELS[hgState.levelIdx].label;
                 resultEmoji.innerText = '💔';
                 resultTitle.innerText = '¡Casi!';
-                resultMsg.innerText = `Se te escaparon los corazoncitos 😢 Atrapaste ${hgState.score} de ${hgState.target}. ¡Tú puedes, inténtalo de nuevo!`;
+                resultMsg.innerText = `Te quedaste sin vidas en el ${lvlName} 😢 ¡Vuelve a intentarlo desde el principio, tú puedes!`;
                 boxReveal.style.display = 'none';
                 retryBtn.style.display = 'block';
-                retryBtn.onclick = () => {
-                    showScreen('day-view');
-                    initHeartGame();
-                };
+                retryBtn.onclick = () => { showScreen('day-view'); initHeartGame(); };
                 backBtn.style.display = 'block';
             }
             showScreen('quiz-result');
