@@ -971,12 +971,14 @@
                 contentEl.innerHTML = `
                     <div style="text-align: center; padding: 1rem;">
                         <p style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: emojiWobble 1.5s infinite;">🐷🦫🐢</p>
-                        <h2 style="font-family: 'Press Start 2P'; font-size: 0.8rem; color: #ff4d6d; margin-bottom: 1.2rem; line-height: 1.7;">¡3 Niveles!<br>¿Puedes ganar?</h2>
+                        <h2 style="font-family: 'Press Start 2P'; font-size: 0.8rem; color: #ff4d6d; margin-bottom: 1.2rem; line-height: 1.7;">¡6 Niveles!<br>¿Te atreves? 😈</h2>
                         <div style="background: rgba(255,255,255,0.08); border: 2px dashed rgba(255,179,193,0.4); border-radius: 20px; padding: 1.2rem; margin-bottom: 1.5rem; text-align: left;">
-                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">🐷 N1: 10 animalitos · trampas suaves</p>
-                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">🦫 N2: 15 animalitos · más rápido y trampas</p>
-                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">🐢 N3: 20 animalitos · caos total 💀</p>
-                            <p style="font-size: 0.9rem; margin-bottom: 0;">💔💣 ¡Las trampas te quitan una vida!</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.4rem;">🐷 N1: 10 · trampas suaves</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.4rem;">🦫 N2: 15 · más rápido y trampas</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.4rem;">🐢 N3: 20 · caos total</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.4rem;">🦊 N4: 25 · pesadilla</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.4rem;">👹 N5: 30 · infierno</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0;">💀 N6: 35 · IMPOSIBLE 💀</p>
                         </div>
                         <button id="btn-start-heartgame" class="btn btn-yes" style="padding: 1rem 2rem; font-size: 0.7rem; width: 100%;">¡Jugar! 🎮</button>
                     </div>
@@ -1237,6 +1239,45 @@
                 trapChance: 0.40,
                 color: '#ff0055',
                 bg: 'linear-gradient(160deg, #0d0030 0%, #2a0050 50%, #0d0030 100%)'
+            },
+            {
+                level: 4,
+                label: 'NIVEL 4',
+                emoji: '🦊',
+                target: 25,
+                spawnDelay: 300,
+                minDelay: 160,
+                baseSpeed: 4.2,
+                speedRamp: 4.0,
+                trapChance: 0.52,
+                color: '#ff6a00',
+                bg: 'linear-gradient(160deg, #1a0500 0%, #3d1000 50%, #1a0500 100%)'
+            },
+            {
+                level: 5,
+                label: 'NIVEL 5',
+                emoji: '👹',
+                target: 30,
+                spawnDelay: 210,
+                minDelay: 110,
+                baseSpeed: 5.5,
+                speedRamp: 5.0,
+                trapChance: 0.62,
+                color: '#c800ff',
+                bg: 'linear-gradient(160deg, #120020 0%, #35004d 50%, #120020 100%)'
+            },
+            {
+                level: 6,
+                label: 'NIVEL 6',
+                emoji: '💀',
+                target: 35,
+                spawnDelay: 145,
+                minDelay: 75,
+                baseSpeed: 7.0,
+                speedRamp: 6.5,
+                trapChance: 0.70,
+                color: '#ff0000',
+                bg: 'linear-gradient(160deg, #0a0000 0%, #250000 50%, #0a0000 100%)'
             }
         ];
 
@@ -1275,6 +1316,7 @@
             const l = hgState.lives;
             document.getElementById('hgame-lives').innerText =
                 '❤️'.repeat(Math.max(l, 0)) + '🖤'.repeat(Math.max(3 - l, 0));
+            document.getElementById('hgame-lives').style.fontSize = l > 3 ? '0.9rem' : '1.3rem';
             // Fondo del juego cambia por nivel
             document.getElementById('heart-game-screen').style.background = lvl.bg;
         }
@@ -1540,7 +1582,7 @@
                 playSound('yes');
                 resultEmoji.innerText = '🎉';
                 resultTitle.innerText = '¡LO LOGRASTE!';
-                resultMsg.innerText = `¡Superaste los 3 niveles! 🐷🦫🐢 Eso merece un premio... ve a buscar esa cajita especial que está esperándote 🎁`;
+                resultMsg.innerText = `¡Superaste los 6 niveles! 🐷🦫🐢🦊👹💀 ¡INCREÍBLE! Eso merece un premio enorme... ve a buscar esa cajita especial que está esperándote 🎁`;
                 boxReveal.style.display = 'block';
                 retryBtn.style.display = 'none';
                 backBtn.style.display = 'block';
