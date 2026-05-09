@@ -634,7 +634,7 @@ p {
     border: 2px solid rgba(255, 179, 193, 0.5);
     border-radius: 14px;
     padding: 0.9rem 1rem;
-    color: #fff;
+    color: #ff4d6d;
     font-family: 'Pixelify Sans', sans-serif;
     font-size: 1rem;
     font-weight: 600;
@@ -754,5 +754,44 @@ p {
 #hgame-miss-flash {
     pointer-events: none;
     transition: opacity 0.1s;
+}
+
+/* =====================================================
+   DÍA 4 & 5: AVENTURA Y REVELACIÓN
+   ===================================================== */
+
+/* Animaciones de flotación */
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.float-item {
+    animation: float 3s ease-in-out infinite;
+}
+
+.float-item:nth-child(even) {
+    animation-delay: 1.5s;
+}
+
+/* Efectos para el ticket */
+.ticket-container {
+    animation: slideUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes emojiWobble {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg) scale(1.1); }
 }
 

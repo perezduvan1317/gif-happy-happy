@@ -22,7 +22,7 @@
             <!-- Espacio para foto de ella: cambiar 'src' por la ruta de tu imagen -->
             <img src="assets/laura/foto_she.png" alt="Cumpleañera">
         </div>
-        <h1> Hola mi casi cumpleañera</h1>
+        <h1 id="welcome-title"> Hola mi casi cumpleañera</h1>
         <p>Te tengo una pregunta muy importante</p>
 
         <div class="countdown-container">
@@ -98,7 +98,7 @@
 
     <!-- Pantalla 5: Calendario -->
     <div class="container" id="calendar-screen" style="display: none;">
-        <h1>Tus Regalitos Especiales</h1>
+        <h1 id="calendar-title">Tus Regalitos Especiales</h1>
         <p>Toca un regalo para descubrir tu sorpresa</p>
         <div class="calendar-grid" id="calendar-grid" style="display: grid;">
             <!-- Dinámicamente generado -->
@@ -146,7 +146,7 @@
         ">
             <p id="quiz-emoji" style="font-size: 2.5rem; text-align: center; margin-bottom: 0.5rem;">💭</p>
             <p id="quiz-question"
-                style="font-size: 1.1rem; color: #fff; text-align: center; font-weight: bold; line-height: 1.4; margin: 0;">
+                style="font-size: 1.1rem; color: #ff4d6d; text-align: center; font-weight: bold; line-height: 1.4; margin: 0;">
             </p>
         </div>
 
@@ -167,8 +167,9 @@
     <!-- Pantalla 8: Resultado Final del Quiz / Juego -->
     <div class="container" id="quiz-result-screen" style="display: none; padding: 2rem; text-align: center;">
         <div id="result-emoji" style="font-size: 5rem; margin-bottom: 1rem;">🎁</div>
-        <h1 id="result-title" style="font-size: 1.2rem; margin-bottom: 1rem;">¡Lo lograste!</h1>
-        <p id="result-message" style="color: #ffb3c1; font-size: 1rem; line-height: 1.6; margin-bottom: 2rem;"></p>
+        <h1 id="result-title" style="font-size: 1.2rem; margin-bottom: 1rem; color: #ff4d6d;">¡Lo lograste!</h1>
+        <p id="result-message"
+            style="color: #ff758f; font-size: 1rem; line-height: 1.6; margin-bottom: 2rem; font-weight: bold;"></p>
         <div id="result-box-reveal"
             style="display: none; background: rgba(255,77,109,0.15); border: 2px dashed #ff4d6d; border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem; animation: pulse-glow 2s infinite;">
             <p style="font-size: 2rem; margin-bottom: 0.5rem;">📦✨</p>
@@ -257,6 +258,16 @@
             if (!UNLOCKED_DAYS.includes(3)) UNLOCKED_DAYS.push(3);
         }
 
+        // Desbloqueo automático día 4: 9 de Mayo
+        if (new Date() >= new Date('2026-05-09T00:00:00')) {
+            if (!UNLOCKED_DAYS.includes(4)) UNLOCKED_DAYS.push(4);
+        }
+
+        // Desbloqueo automático día 5: 10 de Mayo (CUMPLEAÑOS)
+        if (new Date() >= new Date('2026-05-10T00:00:00')) {
+            if (!UNLOCKED_DAYS.includes(5)) UNLOCKED_DAYS.push(5);
+        }
+
         // Lógica de Día Actual
         const urlParams = new URLSearchParams(window.location.search);
         let forcedDay = parseInt(urlParams.get('day'));
@@ -269,7 +280,28 @@
 
         const currentDay = getCurrentDay();
 
+        // Configurar música de fondo según el día
+        const musicFiles = {
+            default: "assets/music/10 - Married Life (Piano Version).mp3",
+            birthday: "assets/music/music_for_video-happy-birthday-to-you-piano-version-13976.mp3"
+        };
+
         window.addEventListener('load', () => {
+            const bgMusicEl = document.getElementById('bg-music');
+            const welcomeTitleEl = document.getElementById('welcome-title');
+            const calendarTitleEl = document.getElementById('calendar-title');
+
+            // ¿Es 10 de Mayo o estamos simulando el día 5?
+            const isBirthday = (new Date() >= new Date('2026-05-10T00:00:00')) || (currentDay === 5);
+
+            if (isBirthday) {
+                bgMusicEl.src = musicFiles.birthday;
+                if (welcomeTitleEl) welcomeTitleEl.innerText = "HOLA MI CUMPLEAÑERA";
+                if (calendarTitleEl) calendarTitleEl.innerText = "HOLA MI CUMPLEAÑERA";
+            } else {
+                bgMusicEl.src = musicFiles.default;
+            }
+
             const acceptedRSVP = localStorage.getItem('acceptedRSVP');
 
             if (forcedDay && forcedDay > 0 && forcedDay <= 5) {
@@ -562,6 +594,10 @@
         // Eventos
         btnStart.addEventListener('click', () => {
             playSound('click');
+            // Iniciar música de fondo (necesario por interacción de usuario)
+            if (bgMusic && bgMusic.paused) {
+                bgMusic.play().catch(e => console.log("Música bloqueada"));
+            }
             // Siempre mostrar la pregunta del SÍ/NO por el chiste de los memes
             showScreen('rsvp');
         });
@@ -724,15 +760,16 @@
                 type: "heart-catcher"
             },
             4: {
-                title: "Día 4: Memoria 📸",
-                content: "Mira esta foto de nosotros... (Aquí podrías poner una foto real)",
-                type: "image",
-                src: "assets/laura/foto_she.png"
+                title: "Test de Supervivencia ⛺",
+                type: "quiz-camping"
             },
             5: {
-                title: "Día 5: ¡FELIZ CUMPLEAÑOS! 🎂",
-                content: "¡LLEGAMOS! Te amo con todo mi corazón. Eres la mejor.",
-                type: "special"
+                title: "¡FELIZ CUMPLEAÑOS! 🎂",
+                type: "camping-reveal",
+                vimeoUrl: "https://vimeo.com/1190670627",
+                locationName: "NEUSA 🌲⛺",
+                locationDesc: "Nos espera un fin de semana mágico rodeados de naturaleza, frío delicioso y mucho amor. ¡Prepárate para nuestra aventura capivarezca!",
+                locationImg: "assets/backgrounds/laguna_neusa.jpg"
             }
         };
 
@@ -784,14 +821,23 @@
         }
 
         function showDayContent(day) {
+            const bgMusic = document.getElementById('bg-music');
+
+            // Si es día 5 (cumpleaños): Happy Birthday suena SIEMPRE
+            // Solo se pausa si abre los días 1, 2 o 3 (tienen videos con audio propio)
+            if (currentDay === 5 && [1, 2, 3].includes(day)) {
+                if (bgMusic) bgMusic.pause();
+            } else if (currentDay === 5) {
+                if (bgMusic) bgMusic.play().catch(e => { });
+            } else {
+                // Días normales: pausar si hay video
+                if (bgMusic && bgMusic.paused) {
+                    bgMusic.play().catch(e => { });
+                }
+            }
+
             const s = surprises[day];
             if (!s) return;
-
-            // Iniciar música si es el Regalo 1 (Married Life)
-            if (day === 1 && bgMusic) {
-                bgMusic.currentTime = 0;
-                bgMusic.play().catch(e => console.log("Auto-play blocked by browser. User interaction needed."));
-            }
 
             showScreen('day-view');
             const titleEl = document.getElementById('day-view-title');
@@ -821,10 +867,8 @@
                             currentSlide++;
                             updateSlide();
                         } else {
-                            // Detener música al finalizar
                             if (bgMusic) {
-                                bgMusic.pause();
-                                bgMusic.currentTime = 0;
+                                bgMusic.play().catch(e => { });
                             }
                             confetti({ particleCount: 150, spread: 70 });
                             showScreen('calendar');
@@ -847,7 +891,7 @@
                         <p id="video-instruction" style="margin-bottom: 1rem; font-size: 1rem; color: #ff4d6d; font-weight: bold;">Mira este pequeño video antes de la sorpresa...</p>
                         
                         <div class="video-reel-container" id="intro-video-container">
-                            <video id="gift-video" playsinline webkit-playsinline controls>
+                            <video id="gift-video" playsinline webkit-playsinline controls autoplay>
                                 <source src="${s.introVideo}" type="video/mp4">
                                 Tu navegador no soporta videos.
                             </video>
@@ -869,7 +913,6 @@
                         <div id="main-video-section" style="display: none; width: 100%; flex-direction: column; align-items: center;">
                             <p style="color: #ff4d6d; font-weight: bold; margin-bottom: 1rem;">Ponte cómoda y ve el video con atención ❤️</p>
                             <div class="video-reel-container" id="main-video-container">
-                                <!-- El contenido se genera dinámicamente según si es YouTube o MP4 -->
                             </div>
                         </div>
                     </div>
@@ -914,7 +957,6 @@
                         const mainContainer = document.getElementById('main-video-container');
 
                         if (s.mainVideo.includes('vimeo.com')) {
-                            // Extraer ID de Vimeo
                             const vimeoId = s.mainVideo.split('/').pop().split('?')[0];
                             mainContainer.innerHTML = `
                                 <iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&badge=0&autopause=0" 
@@ -923,13 +965,12 @@
                                 </iframe>
                             `;
                         } else if (s.mainVideo.includes('youtube.com') || s.mainVideo.includes('youtu.be')) {
-                            // Extraer ID de YouTube
                             let videoId = s.mainVideo.split('/').pop();
                             if (videoId.includes('watch?v=')) videoId = videoId.split('watch?v=')[1];
                             videoId = videoId.split('&')[0].split('?')[0];
 
                             mainContainer.innerHTML = `
-                                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0" 
+                                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0&muted=0" 
                                         frameborder="0" 
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                         allowfullscreen
@@ -967,7 +1008,6 @@
                     }
                 };
             } else if (s.type === 'heart-catcher') {
-                // Mostrar pantalla de intro antes del juego
                 contentEl.innerHTML = `
                     <div style="text-align: center; padding: 1rem;">
                         <p style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: emojiWobble 1.5s infinite;">🐷🦫🐢</p>
@@ -987,6 +1027,120 @@
                     playSound('click');
                     initHeartGame();
                 };
+            } else if (s.type === 'quiz-camping') {
+                contentEl.innerHTML = `
+                    <div style="text-align: center; padding: 1rem;">
+                        <p style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: emojiWobble 1.5s infinite;">⛺🔥🌲</p>
+                        <h2 style="font-family: 'Press Start 2P'; font-size: 0.8rem; color: #ff4d6d; margin-bottom: 1rem; line-height: 1.8;">TEST DE<br>SUPERVIVENCIA</h2>
+                        <div style="background: rgba(255,255,255,0.08); border: 2px dashed rgba(255,179,193,0.4); border-radius: 20px; padding: 1.2rem; margin-bottom: 1.5rem; text-align: left;">
+                            <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">🔥 Demuestra qué tanto sabes de camping.</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">🎒 10 preguntas de "supervivencia".</p>
+                            <p style="font-size: 0.85rem; margin-bottom: 0;">🏆 Obtén tu rango de exploradora.</p>
+                        </div>
+                        <button id="btn-start-campingquiz" class="btn btn-yes" style="padding: 1rem 2rem; font-size: 0.7rem; width: 100%;">¡Empezar Test! 🌲</button>
+                    </div>
+                `;
+                document.getElementById('btn-start-campingquiz').onclick = () => {
+                    playSound('click');
+                    startCampingQuiz();
+                };
+            } else if (s.type === 'camping-reveal') {
+                contentEl.innerHTML = `
+                    <div id="bday-video-container" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                        <p style="color: #ff4d6d; font-weight: bold; margin-bottom: 1rem; text-align: center;">Tengo un mensaje especial para ti hoy... ❤️</p>
+                        <div class="video-reel-container" id="bday-vimeo-frame"></div>
+                        <button id="btn-video-back" class="btn btn-no" style="margin-top: 1rem; font-size: 0.6rem; padding: 0.6rem 1.2rem; opacity: 0.8;">Volver al Calendario 🔙</button>
+                    </div>
+                    <div id="bday-ticket-reveal" style="display: none; width: 100%;"></div>
+                `;
+
+                document.getElementById('btn-video-back').onclick = () => closeSurprise();
+
+                const vimeoId = s.vimeoUrl.split('/').pop().split('?')[0];
+                const videoContainer = document.getElementById('bday-vimeo-frame');
+                videoContainer.innerHTML = `
+                    <iframe id="bday-player" src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&badge=0&autopause=0" 
+                            frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen 
+                            style="width: 100%; height: 100%; border-radius: 20px;">
+                    </iframe>
+                `;
+
+                const player = new Vimeo.Player(document.getElementById('bday-player'));
+
+                player.on('ended', () => {
+                    // Cuando acaba el video, mostrar el ticket
+                    document.getElementById('bday-video-container').style.display = 'none';
+                    const ticketReveal = document.getElementById('bday-ticket-reveal');
+                    ticketReveal.style.display = 'block';
+
+                    ticketReveal.innerHTML = `
+                        <div style="text-align: center; width: 100%; animation: fadeIn 1s ease;">
+                            <h1 style="font-size: 1.4rem; margin-bottom: 1.5rem; color: #ff4d6d;">🎁 ¡TU DESTINO!</h1>
+                            
+                            <div class="ticket-container" style="
+                                background: url('assets/backgrounds/capy_camping.png');
+                                background-size: cover;
+                                background-position: center;
+                                color: #333;
+                                border-radius: 20px;
+                                overflow: hidden;
+                                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+                                width: 100%;
+                                max-width: 320px;
+                                margin: 0 auto;
+                                position: relative;
+                            ">
+                                <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.7); z-index: 1;"></div>
+                                
+                                <div style="position: relative; z-index: 2;">
+                                    <div style="background: #ff4d6d; color: #fff; padding: 1rem; font-family: 'Press Start 2P'; font-size: 0.6rem;">
+                                        PASE DE AVENTURA #0510
+                                    </div>
+                                    
+                                    <img src="${s.locationImg}" style="width: 100%; height: 180px; object-fit: cover; border-bottom: 3px solid #ff4d6d;">
+                                    
+                                    <div style="padding: 1.5rem; text-align: left;">
+                                        <p style="font-size: 0.7rem; color: #666; text-transform: uppercase; margin: 0; font-weight: bold;">Destino</p>
+                                        <h3 style="margin: 0.2rem 0 1rem 0; color: #ff4d6d; font-size: 0.9rem; line-height: 1.2;">${s.locationName}</h3>
+                                        
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                            <div>
+                                                <p style="font-size: 0.7rem; color: #666; text-transform: uppercase; margin: 0; font-weight: bold;">Fecha</p>
+                                                <p style="font-weight: bold; margin: 0; color: #333; font-size: 0.75rem;">23 y 24 DE MAYO</p>
+                                            </div>
+                                            <div style="text-align: right;">
+                                                <p style="font-size: 0.7rem; color: #666; text-transform: uppercase; margin: 0; font-weight: bold;">Pasajeros</p>
+                                                <p style="font-weight: bold; margin: 0; color: #333; font-size: 0.8rem;">L & D ❤️</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <p style="font-size: 0.8rem; line-height: 1.4; font-style: italic; color: #333; border-top: 1px dashed #ff4d6d; padding-top: 1rem; margin-top: 1rem; font-weight: 500;">
+                                            "${s.locationDesc}"
+                                        </p>
+                                    </div>
+                                    
+                                    <div style="background: rgba(255,77,109,0.1); padding: 1rem; border-top: 2px dashed #ff4d6d;">
+                                        <p style="font-family: 'Press Start 2P'; font-size: 0.4rem; color: #ff4d6d;">VALE POR UNA NOCHE MÁGICA</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p style="margin-top: 1.5rem; color: #ffb3c1; font-size: 1rem; font-weight: bold;">¡TE AMO MUCHO!</p>
+                            <button id="btn-final-back" class="btn btn-yes" style="margin-top: 1.5rem; font-size: 0.8rem; padding: 1rem 2rem; width: auto;">Volver al Inicio ❤️</button>
+                        </div>
+                    `;
+
+                    document.getElementById('btn-final-back').onclick = () => {
+                        closeSurprise();
+                    };
+
+                    confetti({
+                        particleCount: 200,
+                        spread: 100,
+                        origin: { y: 0.6 },
+                        colors: ['#ff4d6d', '#ffd700', '#ffffff']
+                    });
+                });
             } else {
                 let html = '';
                 if (s.type === 'image') {
@@ -1015,7 +1169,11 @@
         // =====================================================
         // QUIZ DEL MESIVERSARIO
         // =====================================================
-        const quizQuestions = [
+        // Contexto activo del quiz ('day3' o 'day4')
+        let quizContext = 'day3';
+
+        // === QUIZ DÍA 3: MESIVERSARIO ===
+        let quizQuestions = [
             {
                 emoji: '🎵',
                 question: '¿Cuál es la canción que más me escuchas poner?',
@@ -1053,10 +1211,85 @@
             }
         ];
 
+        // === QUIZ DÍA 4: CAMPING ===
+        const quizCampingQuestions = [
+            {
+                emoji: '😴',
+                question: '¿Qué es lo mejor de despertar en una carpa?',
+                options: ['El sonido de los pájaros', 'No tener que bañarme', 'El aire puro', 'Despertar a tu lado'],
+                correct: 1,
+                wrongMsg: '¡Esa es la actitud! Un día sin ducha es un día de aventura 😂'
+            },
+            {
+                emoji: '🦟',
+                question: '¿Cómo se espantan los mosquitos de forma efectiva?',
+                options: ['Con repelente caro', 'Bailando reggaetón', 'Con el humo de la fogata', 'Ofreciéndoles a Duvan como sacrificio'],
+                correct: 3,
+                wrongMsg: '¡Pobre Duvan! Pero bueno, si es por tu bienestar... 😂'
+            },
+            {
+                emoji: '🍔',
+                question: '¿Qué hacemos si se nos olvida la comida?',
+                options: ['Cazamos un conejo', 'Ayuno espiritual', 'Miramos a Duvan con hambre', 'Pedimos un domicilio al bosque'],
+                correct: 3,
+                wrongMsg: '¿Llegará Rappi al medio del bosque? Habría que intentarlo 😂'
+            },
+            {
+                emoji: '🐻',
+                question: 'Si escuchamos un ruido afuera de la carpa, la estrategia es:',
+                options: ['Hacerse la muerta', 'Gritar por ayuda', 'Ofrecerle un malvavisco', 'Usar a Duvan de escudo humano'],
+                correct: 3,
+                wrongMsg: 'Para eso está él, para protegerte de "monstruos" imaginarios ❤️'
+            },
+            {
+                emoji: '⛺',
+                question: '¿Qué es lo más difícil de armar la carpa?',
+                options: ['Las varillas', 'Entender el manual', 'No terminar peleando', 'Que no se vuele'],
+                correct: 2,
+                wrongMsg: 'Es la prueba de fuego de toda pareja, ¡paciencia! 😂'
+            },
+            {
+                emoji: '👫',
+                question: '¿Cuál es la regla de oro del camping en pareja?',
+                options: ['Ayudar con la carga', 'Cargar la maleta pesada', 'El que cocina no lava', 'Siempre hay espacio para un abrazo'],
+                correct: 3,
+                wrongMsg: '¡Exacto! El frío se quita con abrazos, no hay de otra ❤️'
+            },
+            {
+                emoji: '🧭',
+                question: '¿Qué pasa si nos perdemos en el bosque?',
+                options: ['Seguimos el musgo', 'Usamos el GPS', 'Peleamos por el mapa', 'Vivimos ahí como capivaras'],
+                correct: 3,
+                wrongMsg: 'Seríamos las capivaras más felices del bosque, ¿no? 🦫'
+            },
+            {
+                emoji: '👕',
+                question: '¿Cuál es el "outfit" oficial para el camping?',
+                options: ['Vestido de gala', 'Ropa de marca', 'Pijama cómoda y despeinada', 'Lo primero que encuentre'],
+                correct: 2,
+                wrongMsg: 'Ese es el verdadero look aventurero, ¡comodidad ante todo! ✨'
+            },
+            {
+                emoji: '🔦',
+                question: '¿Para qué sirve realmente la linterna?',
+                options: ['Para ver el camino', 'Para señales de auxilio', 'Para historias de terror', 'Para buscar el celular en la carpa'],
+                correct: 3,
+                wrongMsg: '¡Confirma! Siempre se pierde entre las cobijas 😂'
+            },
+            {
+                emoji: '📦',
+                question: 'Al final del viaje, ¿qué es lo que más nos llevamos?',
+                options: ['Picaduras de mosquitos', 'Ropa muy sucia', 'Muchos recuerdos y amor', 'Todas las anteriores'],
+                correct: 2,
+                wrongMsg: '¡Esa es la respuesta ganadora! Un paquete completo de felicidad ❤️'
+            }
+        ];
+
         let quizState = {
             current: 0,
             lives: 3,
-            passed: false
+            passed: false,
+            score: 0 // Añadimos score para el test de camping
         };
 
         const quizScreenEl = document.getElementById('quiz-screen');
@@ -1077,7 +1310,61 @@
         });
 
         function startAnniversaryQuiz() {
+            quizContext = 'day3';
+            quizQuestions = [
+                {
+                    emoji: '🎵',
+                    question: '¿Cuál es la canción que más me escuchas poner?',
+                    options: ['Benson Boone - Beautiful Things', 'Morat - Cómo Te Atreves', 'Coldplay - Yellow', 'Ed Sheeran - Perfect'],
+                    correct: 0,
+                    wrongMsg: '¡Casi! Es Beautiful Things de Benson Boone, la que suena cada vez que estoy de buen humor 😅'
+                },
+                {
+                    emoji: '🍕',
+                    question: '¿Cuál es mi comida favorita?',
+                    options: ['Hamburguesa', 'Pizza', 'Sushi', 'Tacos'],
+                    correct: 1,
+                    wrongMsg: '¡Nooo! Es pizza. Siempre pizza. Pizza para todo 🍕'
+                },
+                {
+                    emoji: '😴',
+                    question: '¿Cuál es mi mayor defecto según yo mismo?',
+                    options: ['Soy muy terco', 'Me demoro mucho despertando', 'Soy despistado', 'Como muy rápido'],
+                    correct: 1,
+                    wrongMsg: 'Me cuesta MUCHO levantarme en las mañanas... y lo sabes jaja 😅'
+                },
+                {
+                    emoji: '💭',
+                    question: '¿Qué es lo que más me gusta de nosotros?',
+                    options: ['Que podemos hablar de todo', 'Que siempre nos reímos', 'Que nos apoyamos', 'Todas las anteriores'],
+                    correct: 3,
+                    wrongMsg: '¡Son todas! No podía escoger solo una porque todas son verdad contigo 💕'
+                },
+                {
+                    emoji: '🌙',
+                    question: '¿En qué momento del día pienso más en ti?',
+                    options: ['En la mañana', 'En el almuerzo', 'En la noche antes de dormir', 'Todo el tiempo'],
+                    correct: 3,
+                    wrongMsg: '¡Todo el tiempo! No hay un momento específico porque siempre apareces en mi cabeza ❤️'
+                }
+            ];
             quizState = { current: 0, lives: 3, passed: false };
+            showScreen('quiz');
+            renderQuizQuestion();
+        }
+
+        function startDay4Quiz() {
+            // Este ya no se usa, pero lo dejamos por si acaso
+            quizContext = 'day4';
+            quizState = { current: 0, lives: 3, passed: false, score: 0 };
+            showScreen('quiz');
+            renderQuizQuestion();
+        }
+
+        function startCampingQuiz() {
+            quizContext = 'camping';
+            quizQuestions = quizCampingQuestions;
+            quizState = { current: 0, lives: 3, passed: false, score: 0 };
             showScreen('quiz');
             renderQuizQuestion();
         }
@@ -1090,9 +1377,15 @@
             document.getElementById('quiz-counter').innerText = `${quizState.current + 1}/${total}`;
             document.getElementById('quiz-progress-fill').style.width = `${((quizState.current) / total) * 100}%`;
 
-            // Hearts
-            const hearts = '❤️'.repeat(quizState.lives) + '🖤'.repeat(3 - quizState.lives);
-            document.getElementById('quiz-hearts').innerText = hearts;
+            // Hearts (Ocultar si es camping)
+            const heartsEl = document.getElementById('quiz-hearts');
+            if (quizContext === 'camping') {
+                heartsEl.style.display = 'none';
+            } else {
+                heartsEl.style.display = 'block';
+                const hearts = '❤️'.repeat(quizState.lives) + '🖤'.repeat(3 - quizState.lives);
+                heartsEl.innerText = hearts;
+            }
 
             // Question
             document.getElementById('quiz-emoji').innerText = q.emoji;
@@ -1118,15 +1411,17 @@
             const feedbackEl = document.getElementById('quiz-feedback');
             const optionBtns = document.querySelectorAll('.quiz-option-btn');
 
-            // Disable all buttons
+            // Deshabilitar botones para evitar doble clic
             optionBtns.forEach(b => b.disabled = true);
 
-            // Mark correct
+            // Marcar la correcta siempre para que sepa cuál era
             optionBtns[q.correct].classList.add('quiz-correct');
 
             if (selectedIndex === q.correct) {
                 playSound('yes');
+                quizState.score++;
                 optionBtns[selectedIndex].classList.add('quiz-correct');
+
                 feedbackEl.style.display = 'block';
                 feedbackEl.style.background = 'rgba(100, 200, 100, 0.2)';
                 feedbackEl.style.border = '1px solid rgba(100, 200, 100, 0.4)';
@@ -1141,11 +1436,15 @@
                     } else {
                         renderQuizQuestion();
                     }
-                }, 1200);
+                }, 1500);
             } else {
                 playSound('no');
                 optionBtns[selectedIndex].classList.add('quiz-wrong');
-                quizState.lives--;
+
+                // Solo restamos vidas si NO es el quiz de camping
+                if (quizContext !== 'camping') {
+                    quizState.lives--;
+                }
 
                 feedbackEl.style.display = 'block';
                 feedbackEl.style.background = 'rgba(255, 77, 109, 0.15)';
@@ -1153,13 +1452,20 @@
                 feedbackEl.style.color = '#ff9fb3';
                 feedbackEl.innerText = q.wrongMsg;
 
-                if (quizState.lives <= 0) {
-                    setTimeout(() => showQuizResult(false), 2000);
-                } else {
-                    setTimeout(() => {
-                        renderQuizQuestion();
-                    }, 2500);
-                }
+                setTimeout(() => {
+                    // Si es el test de camping, siempre pasamos a la siguiente
+                    // Si es otro quiz y se quedó sin vidas, mostramos error
+                    if (quizContext !== 'camping' && quizState.lives <= 0) {
+                        showQuizResult(false);
+                    } else {
+                        quizState.current++;
+                        if (quizState.current >= quizQuestions.length) {
+                            showQuizResult(true);
+                        } else {
+                            renderQuizQuestion();
+                        }
+                    }
+                }, 2500);
             }
         }
 
@@ -1179,15 +1485,35 @@
 
             if (passed) {
                 resultEmoji.innerText = '🎉';
-                resultTitle.innerText = '¡Lo lograste, mi amor!';
-                resultMsg.innerText = 'Sabía que me conocías bien 💕 Como premio a tu esfuerzo... ahora sí puedes ir a abrir esa cajita que está esperándote. ¡Espero que te guste mucho!';
-                boxReveal.style.display = 'block';
+                if (quizContext === 'camping') {
+                    const levels = [
+                        "Novata de Ciudad ☕💅",
+                        "Exploradora Principiante 🏕️",
+                        "Campista con Estilo ✨",
+                        "Aventurera de Corazón 🌲",
+                        "Bear Grylls Femenina 🐻🔥"
+                    ];
+                    // Mapeamos el score (0-10) a los 5 niveles
+                    const levelIdx = Math.floor((quizState.score - 1) / 2);
+                    const level = levels[Math.max(0, Math.min(levelIdx, 4))];
+                    resultTitle.innerText = `Rango: ${level}`;
+                    resultMsg.innerText = `¡Completaste el test! Tu puntaje fue de ${quizState.score}/10. ${quizState.score >= 7 ? '¡Estás más que lista para mañana!' : 'Mmm... tendremos que practicar un poco en el camino 😂'} ¡Prepárate para la aventura!`;
+                    retryBtn.style.display = 'block';
+                    retryBtn.innerText = 'Mejorar mi Rango 🔄';
+                } else if (quizContext === 'day4') {
+                } else {
+                    resultTitle.innerText = '¡Lo lograste, mi amor!';
+                    resultMsg.innerText = 'Sabía que me conocías bien 💕 Como premio a tu esfuerzo... ahora sí puedes ir a abrir esa cajita que está esperándote. ¡Espero que te guste mucho!';
+                }
+                boxReveal.style.display = quizContext === 'day4' ? 'none' : 'block';
                 retryBtn.style.display = 'none';
                 playSound('yes');
             } else {
                 resultEmoji.innerText = '🙈';
-                resultTitle.innerText = 'Casi, casi...';
-                resultMsg.innerText = 'Se te acabaron los corazones 😅 Pero no te preocupes, puedes volver a intentarlo. ¡Tú puedes!';
+                resultTitle.innerText = quizContext === 'day4' ? 'Mmm... ¿en serio? 😏' : 'Casi, casi...';
+                resultMsg.innerText = quizContext === 'day4'
+                    ? '¡Se te acabaron los corazones! Parece que no me conoces tan bien... o sí y solo te distrajiste 😂 ¡Inténtalo de nuevo!'
+                    : 'Se te acabaron los corazones 😅 Pero no te preocupes, puedes volver a intentarlo. ¡Tú puedes!';
                 boxReveal.style.display = 'none';
                 retryBtn.style.display = 'block';
             }
